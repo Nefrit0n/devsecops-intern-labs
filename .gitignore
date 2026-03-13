@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Reports and temporary outputs
+reports/*.json
+reports/*.sarif
+reports/*.spdx.json
+reports/*.txt
+!reports/.gitkeep
+
+# Docker / local artifacts
+*.log
+*.tmp
+.DS_Store
