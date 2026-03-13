@@ -1,12 +1,12 @@
 # devsecops-intern-labs
 
-`devsecops-intern-labs` — это учебный репозиторий для практики Intern-уровня по DevSecOps в полностью локальной среде.
+`devsecops-intern-labs` — учебный репозиторий для практики Intern-уровня по DevSecOps в полностью локальной среде.
 
 ## Цель репозитория
 - Дать реалистичный hands-on практикум по DevSecOps.
 - Научить запускать security-проверки локально.
 - Показать mini security pipeline без реального GitLab CI/CD.
-- Использовать уязвимое учебное приложение как полигон для анализа.
+- Показать разницу между уязвимыми и более безопасными практиками.
 
 ## Необходимые инструменты
 - `git`
@@ -80,7 +80,6 @@ syft version
 devsecops-intern-labs/
   README.md
   AGENTS.md
-  .gitignore
   Makefile
   reports/
   vulnerable-app/
@@ -90,31 +89,76 @@ devsecops-intern-labs/
   solutions/
 ```
 
-## Roadmap прохождения лабораторных
+## Стандарт структуры лабораторных
+Для единообразия все лабораторные в репозитории оформляются по шаблону:
+- **Цель**
+- **Шаги выполнения**
+- **Ожидаемый результат**
+- **Вопросы на понимание**
+
+Дополнительно можно добавлять:
+- **Команды**
+- **Критерии проверки**
+- **Подсказки**
+
+## Roadmap прохождения
 1. Подготовить окружение и проверить инструменты.
 2. Запустить `vulnerable-app` локально и через Docker.
 3. Пройти `docker-labs` для базового понимания контейнерной безопасности.
 4. Запустить scanner scripts по `vulnerable-app`.
 5. Пройти `webgoat-labs` для практики на более крупном проекте.
-6. Сравнить свои результаты с подсказками в `solutions/`.
+6. Сравнить результаты с подсказками в `solutions/`.
 7. Сформировать краткий remediation plan.
 
 ## Что должен уметь студент после прохождения
 - Понимать базовые практики DevSecOps и роль security checks.
 - Запускать SCA, SAST, secret scanning, container scanning и SBOM локально.
 - Читать отчёты Trivy / Gitleaks / Semgrep / Syft.
+- Запускать pipeline в информативном и blocking-режиме.
 - Находить базовые анти-паттерны в Python/Flask и Dockerfile.
-- Собирать мини pipeline в Bash без CI/CD.
 
-## Как проверять результат локально
-### Быстрый старт
+## Security policy для сканеров
+Единые пороги и политики находятся в `scanner-scripts/security-thresholds.env`.
+
+Что можно менять студенту:
+- severity threshold (например, `HIGH,CRITICAL`);
+- fail policy (`*_EXIT_CODE`, `SAST_FAIL_ON_FINDINGS`);
+- путь к rules/config (`SAST_CONFIG`, `SECRET_CONFIG`).
+
+## Локальный pipeline: два режима
+
+### 1) Informative / warn-only
+Подходит для раннего этапа обучения и triage: сканы выполняются, но pipeline не падает.
+
+```bash
+WARN_ONLY=true FAIL_ON_ANY_ERROR=false bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+# или
+make full-scan-warn
+```
+
+### 2) Blocking / quality gate
+Подходит для проверки готовности перед «условным релизом»: при ошибках pipeline завершится `exit 1`.
+
+```bash
+WARN_ONLY=false FAIL_ON_ANY_ERROR=true bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+# или
+make full-scan-gate
+```
+
+### Какие переменные влияют на pass/fail
+- `WARN_ONLY=true` — принудительно переводит проверки в режим предупреждений.
+- `FAIL_ON_ANY_ERROR=true` — при наличии ошибок финальный статус будет `FAILED` и `exit 1`.
+- Пороговые переменные из `security-thresholds.env` задают, что считается ошибкой для конкретного сканера.
+
+## Быстрый старт
 ```bash
 make help
 make build-app
-make full-scan
+make full-scan-warn
+make full-scan-gate
 ```
 
-### Ручной запуск скриптов
+## Ручной запуск отдельных скриптов
 ```bash
 bash scanner-scripts/run_secret_scan.sh .
 bash scanner-scripts/run_sca_scan.sh .
@@ -124,23 +168,3 @@ bash scanner-scripts/generate_sbom.sh ./vulnerable-app
 ```
 
 Все результаты сохраняются в `reports/`.
-
-## Типичные ошибки студентов
-- Запуск сканеров без установки CLI-инструментов.
-- Запуск `trivy image` до сборки Docker-образа.
-- Неправильный путь к директории сканирования.
-- Игнорирование ложноположительных/контекстных срабатываний.
-- Отсутствие итогового краткого вывода по результатам сканов.
-- Использование `latest` тегов и root-пользователя в Dockerfile.
-
-## Полезные команды
-```bash
-make run-app
-make build-app
-make secret-scan
-make sca-scan
-make sast-scan
-make container-scan
-make sbom
-make full-scan
-```
