@@ -1,7 +1,12 @@
 from flask import Flask, jsonify, request
+import ipaddress
+import re
 import subprocess
 
 app = Flask(__name__)
+
+SAFE_DIAGNOSTIC_ALLOWLIST = {"127.0.0.1", "localhost", "::1"}
+SAFE_HOST_PATTERN = re.compile(r"^[a-zA-Z0-9.-]{1,253}$")
 
 
 @app.get("/health")
@@ -53,6 +58,50 @@ def diagnostic_ping():
     output = subprocess.getoutput(command)
 
     return jsonify({"host": host, "output": output})
+
+
+@app.get("/diagnostic/ping-safe")
+def diagnostic_ping_safe():
+    """Безопасная альтернатива: allow-list + shell=False + timeout."""
+    host = request.args.get("host", "127.0.0.1").strip().lower()
+
+    is_allowed = host in SAFE_DIAGNOSTIC_ALLOWLIST
+    if not is_allowed and SAFE_HOST_PATTERN.match(host):
+        try:
+            parsed_ip = ipaddress.ip_address(host)
+            is_allowed = parsed_ip.is_loopback
+        except ValueError:
+            is_allowed = host.endswith(".local")
+
+    if not is_allowed:
+        return jsonify({"error": "host is not allowed for safe diagnostic mode"}), 400
+
+    try:
+        result = subprocess.run(
+            ["ping", "-c", "1", host],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=3,
+            shell=False,
+        )
+    except subprocess.TimeoutExpired:
+        return jsonify({"host": host, "error": "ping timeout"}), 504
+    except OSError:
+        return jsonify({"host": host, "error": "diagnostic tool unavailable"}), 500
+
+    status_code = 200 if result.returncode == 0 else 502
+    return (
+        jsonify(
+            {
+                "host": host,
+                "returncode": result.returncode,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+            }
+        ),
+        status_code,
+    )
 
 
 if __name__ == "__main__":

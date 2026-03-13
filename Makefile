@@ -1,4 +1,4 @@
-.PHONY: help run-app build-app full-scan secret-scan sca-scan sast-scan container-scan sbom
+.PHONY: help run-app build-app full-scan full-scan-warn full-scan-gate secret-scan sca-scan sast-scan container-scan sbom
 
 help:
 	@echo "Доступные команды:"
@@ -9,7 +9,9 @@ help:
 	@echo "  make sast-scan        - запуск semgrep"
 	@echo "  make container-scan   - запуск trivy image (если образ существует)"
 	@echo "  make sbom             - генерация SBOM через syft"
-	@echo "  make full-scan        - полный локальный security pipeline"
+	@echo "  make full-scan        - полный локальный security pipeline (по умолчанию gate)"
+	@echo "  make full-scan-warn   - pipeline в информативном warn-only режиме"
+	@echo "  make full-scan-gate   - pipeline в blocking quality gate режиме"
 
 run-app:
 	python3 vulnerable-app/app.py
@@ -33,4 +35,10 @@ sbom:
 	bash scanner-scripts/generate_sbom.sh ./vulnerable-app
 
 full-scan:
-	bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab
+	WARN_ONLY=false FAIL_ON_ANY_ERROR=true bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+
+full-scan-warn:
+	WARN_ONLY=true FAIL_ON_ANY_ERROR=false bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+
+full-scan-gate:
+	WARN_ONLY=false FAIL_ON_ANY_ERROR=true bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
