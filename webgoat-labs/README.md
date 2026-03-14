@@ -120,18 +120,18 @@ gitleaks detect --source . --report-path gitleaks-report.json --report-format js
 
 ---
 
-## Лабораторная 4: SAST через Semgrep
+## Лабораторная 4: SAST через OpenGrep
 ### Цель
 Найти потенциально небезопасные паттерны в коде.
 
 ### Шаги выполнения
-1. Запустите semgrep с базовым набором правил.
+1. Запустите OpenGrep с базовым набором правил.
 2. Сохраните JSON-отчёт.
 
 ### Команды
 ```bash
 cd WebGoat
-semgrep --config auto --json --output semgrep-report.json .
+opengrep --config auto --json --output opengrep-report.json .
 ```
 
 ### Ожидаемый результат
@@ -142,7 +142,7 @@ semgrep --config auto --json --output semgrep-report.json .
 - Какие findings требуют контекстного анализа?
 
 ### Критерии проверки
-- Есть отчёт `semgrep-report.json`.
+- Есть отчёт `opengrep-report.json`.
 - Есть минимум 3 интерпретации findings.
 
 ---

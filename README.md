@@ -15,7 +15,7 @@
 - `bash`
 - `trivy`
 - `gitleaks`
-- `semgrep`
+- `opengrep`
 - `syft`
 
 ## Установка инструментов
@@ -49,9 +49,9 @@ brew install gitleaks
 # Linux (скачайте релиз с GitHub и добавьте в PATH)
 ```
 
-### 4) Semgrep
+### 4) OpenGrep
 ```bash
-python3 -m pip install --user semgrep
+python3 -m pip install --user opengrep
 ```
 
 ### 5) Syft
@@ -71,7 +71,7 @@ python3 --version
 bash --version
 trivy --version
 gitleaks version
-semgrep --version
+opengrep --version
 syft version
 ```
 
@@ -113,7 +113,7 @@ devsecops-intern-labs/
 ## Что должен уметь студент после прохождения
 - Понимать базовые практики DevSecOps и роль security checks.
 - Запускать SCA, SAST, secret scanning, container scanning и SBOM локально.
-- Читать отчёты Trivy / Gitleaks / Semgrep / Syft.
+- Читать отчёты Trivy / Gitleaks / OpenGrep / Syft.
 - Запускать pipeline в информативном и blocking-режиме.
 - Находить базовые анти-паттерны в Python/Flask и Dockerfile.
 
@@ -123,7 +123,7 @@ devsecops-intern-labs/
 Что можно менять студенту:
 - severity threshold (например, `HIGH,CRITICAL`);
 - fail policy (`*_EXIT_CODE`, `SAST_FAIL_ON_FINDINGS`);
-- путь к rules/config (`SAST_CONFIG`, `SECRET_CONFIG`).
+- путь к rules/config (`OPENGREP_CONFIG`, `SECRET_CONFIG`).
 
 ## Локальный pipeline: два режима
 

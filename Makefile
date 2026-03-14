@@ -6,7 +6,7 @@ help:
 	@echo "  make build-app        - сборка Docker-образа vulnerable-app"
 	@echo "  make secret-scan      - запуск gitleaks"
 	@echo "  make sca-scan         - запуск trivy fs"
-	@echo "  make sast-scan        - запуск semgrep"
+	@echo "  make sast-scan        - запуск opengrep"
 	@echo "  make container-scan   - запуск trivy image (если образ существует)"
 	@echo "  make sbom             - генерация SBOM через syft"
 	@echo "  make full-scan        - полный локальный security pipeline (по умолчанию gate)"
