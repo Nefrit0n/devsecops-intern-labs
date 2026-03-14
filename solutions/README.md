@@ -40,7 +40,7 @@ CMD ["python", "app.py"]
 ## 3) Пример отчёта по уязвимостям (краткий шаблон)
 
 - **Объект:** `vulnerable-app:lab`
-- **Инструменты:** Trivy, Gitleaks, Semgrep, Syft
+- **Инструменты:** Trivy, Gitleaks, OpenGrep, Syft
 - **Критичные находки:** 0
 - **Высокие:** 2
 - **Средние:** 6
@@ -60,5 +60,5 @@ CMD ["python", "app.py"]
 
 - **Trivy:** смотрим severity + fix availability; приоритизируем HIGH/CRITICAL с доступным патчем.
 - **Gitleaks:** валидируем каждое срабатывание, отделяя тестовые строки от реальных секретов.
-- **Semgrep:** разделяем true/false positives, проверяем потенциальный exploit path.
+- **OpenGrep:** разделяем true/false positives, проверяем потенциальный exploit path.
 - **Syft:** используем SBOM как inventory компонентов и базу для дальнейшего risk management.
