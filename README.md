@@ -22,20 +22,43 @@
 > Используйте локально запускаемые open-source инструменты. Никакие облачные сервисы не обязательны.
 
 ## Быстрый старт (рекомендуемый путь)
-1. Откройте репозиторий.
-2. Проверьте, что инструменты установлены.
-3. Соберите учебное приложение.
-4. Запустите сканы в режиме предупреждений.
-5. Запустите сканы в блокирующем режиме.
-
-Команды:
+### Шаг 0. Базовый bootstrap (до `make`)
+Сначала нужны `git` и `make`, чтобы склонировать репозиторий и запускать Make-команды.
 
 ```bash
+# Linux (Ubuntu/Debian)
+sudo apt-get update
+sudo apt-get install -y git make
+
+# macOS (Homebrew)
+brew install git make
+```
+
+### Шаг 1. Клонировать репозиторий
+```bash
+git clone <URL_ЭТОГО_РЕПО>
+cd devsecops-intern-labs
+```
+
+### Шаг 2. Установить инструменты и запустить лабораторные команды
+```bash
 make help
+make install-tools
 make build-app
 make full-scan-warn
 make full-scan-gate
 ```
+
+## Установка всего необходимого ПО (через Make)
+> Перед этим шагом должны быть установлены `git` и `make` (см. bootstrap выше).
+```bash
+make install-tools
+```
+
+Что делает команда:
+- ставит базовые инструменты и сканеры через `apt-get` (Linux) или `brew` (macOS/Linuxbrew);
+- ставит Trivy, Gitleaks, Syft и OpenGrep;
+- ставит Python-зависимости учебного приложения через `pip` с флагом `--break-system-packages`.
 
 ## Проверка, что инструменты доступны
 ```bash
