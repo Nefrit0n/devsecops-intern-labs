@@ -38,6 +38,7 @@ brew install git make
 ```bash
 git clone <URL_ЭТОГО_РЕПО>
 cd devsecops-intern-labs
+git clone https://github.com/opengrep/opengrep-rules.git
 ```
 
 ### Шаг 2. Установить инструменты и запустить лабораторные команды
