@@ -28,7 +28,7 @@ services:
       lab.role: "primary-target"
 
   wrong-secrets:
-    image: jeroenwillemsen/wrongsecrets:latest-no-vault
+    image: jeroenwillemsen/wrongsecrets:3.1.1-no-vault
     container_name: lab-wrong-secrets
     ports:
       - "8080:8080"
@@ -84,7 +84,7 @@ services:
       start_period: 20s
 
   crapi-chromadb:
-    image: chromadb/chroma:latest
+    image: chromadb/chroma:0.5.5
     container_name: lab-crapi-chromadb
     environment:
       IS_PERSISTENT: "TRUE"
@@ -100,7 +100,7 @@ services:
       start_period: 20s
 
   crapi-mailhog:
-    image: crapi/mailhog:latest
+    image: crapi/mailhog:0.6.0
     container_name: lab-crapi-mailhog
     user: root
     environment:
@@ -120,7 +120,7 @@ services:
       retries: 15
 
   crapi-identity:
-    image: crapi/crapi-identity:latest
+    image: crapi/crapi-identity:0.8.0
     container_name: lab-crapi-identity
     environment:
       LOG_LEVEL: INFO
@@ -169,7 +169,7 @@ services:
       retries: 15
 
   crapi-community:
-    image: crapi/crapi-community:latest
+    image: crapi/crapi-community:0.8.0
     container_name: lab-crapi-community
     environment:
       LOG_LEVEL: INFO
@@ -204,7 +204,7 @@ services:
       retries: 15
 
   crapi-workshop:
-    image: crapi/crapi-workshop:latest
+    image: crapi/crapi-workshop:0.8.0
     container_name: lab-crapi-workshop
     environment:
       LOG_LEVEL: INFO
@@ -249,7 +249,7 @@ services:
       retries: 15
 
   crapi-chatbot:
-    image: crapi/crapi-chatbot:latest
+    image: crapi/crapi-chatbot:0.8.0
     container_name: lab-crapi-chatbot
     environment:
       TLS_ENABLED: "false"
@@ -285,7 +285,7 @@ services:
     profiles: [ targets-extended, all ]
 
   crapi-web:
-    image: crapi/crapi-web:latest
+    image: crapi/crapi-web:0.8.0
     container_name: lab-crapi-web
     ports:
       - "8888:80"
@@ -315,7 +315,7 @@ services:
       lab.role: "api-target"
 
   api.mypremiumdealership.com:
-    image: crapi/gateway-service:latest
+    image: crapi/gateway-service:0.8.0
     container_name: lab-crapi-gateway
     restart: unless-stopped
     profiles: [ targets-extended, all ]
@@ -362,7 +362,7 @@ services:
       retries: 20
 
   defectdojo-initializer:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:2.30.3
     container_name: lab-defectdojo-initializer
     depends_on:
       defectdojo-db:
@@ -382,7 +382,7 @@ services:
     profiles: [ management, all ]
 
   defectdojo-uwsgi:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:2.30.3
     container_name: lab-defectdojo-uwsgi
     depends_on:
       defectdojo-initializer:
@@ -406,7 +406,7 @@ services:
     profiles: [ management, all ]
 
   defectdojo-nginx:
-    image: defectdojo/defectdojo-nginx:latest
+    image: defectdojo/defectdojo-nginx:2.30.3
     container_name: lab-defectdojo
     depends_on:
       defectdojo-uwsgi:
@@ -432,7 +432,7 @@ services:
       lab.role: "vulnerability-management"
 
   defectdojo-celery-beat:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:2.30.3
     container_name: lab-defectdojo-celery-beat
     depends_on:
       defectdojo-initializer:
@@ -452,7 +452,7 @@ services:
     profiles: [ management, all ]
 
   defectdojo-celery-worker:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:2.30.3
     container_name: lab-defectdojo-celery-worker
     depends_on:
       defectdojo-initializer:
@@ -495,7 +495,7 @@ services:
       retries: 20
 
   dependency-track-api:
-    image: dependencytrack/apiserver:latest
+    image: dependencytrack/apiserver:4.11.7
     container_name: lab-dtrack-api
     depends_on:
       dtrack-postgres:
@@ -523,7 +523,7 @@ services:
       lab.role: "sbom-monitoring"
 
   dependency-track-frontend:
-    image: dependencytrack/frontend:latest
+    image: dependencytrack/frontend:4.11.7
     container_name: lab-dtrack-ui
     depends_on:
       dependency-track-api:
@@ -540,7 +540,7 @@ services:
   # ──────────────────────────────────────────────────────────
 
   zap:
-    image: ghcr.io/zaproxy/zaproxy:stable
+    image: ghcr.io/zaproxy/zaproxy:2.16.1
     container_name: lab-zap
     volumes:
       - zap-reports:/zap/wrk

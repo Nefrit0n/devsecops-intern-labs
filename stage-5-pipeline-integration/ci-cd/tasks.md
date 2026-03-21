@@ -128,7 +128,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: 'fs'
           severity: 'CRITICAL,HIGH'
@@ -150,7 +150,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Checkov
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@v12.2800.0
         with:
           directory: .
           framework: dockerfile,kubernetes
@@ -215,7 +215,7 @@ jobs:
         run: docker build -t $IMAGE .
 
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ env.IMAGE }}
           format: 'json'

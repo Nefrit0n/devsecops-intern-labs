@@ -44,6 +44,50 @@ docker compose -f lab-infra/docker-compose.lab.yml --profile all up -d
 
 ---
 
+
+## Матрица зафиксированных версий
+
+> В учебной инфраструктуре запрещено использовать плавающие теги (`latest`, `stable`, `master`) для критичных сервисов.
+
+| Контур | Сервис | Образ | Зафиксированная версия |
+|---|---|---|---|
+| Targets | Juice Shop | `bkimminich/juice-shop` | `v17.1.1` |
+| Targets | WrongSecrets | `jeroenwillemsen/wrongsecrets` | `3.1.1-no-vault` |
+| Targets-extended | crAPI ChromaDB | `chromadb/chroma` | `0.5.5` |
+| Targets-extended | crAPI Mailhog | `crapi/mailhog` | `0.6.0` |
+| Targets-extended | crAPI Identity | `crapi/crapi-identity` | `0.8.0` |
+| Targets-extended | crAPI Community | `crapi/crapi-community` | `0.8.0` |
+| Targets-extended | crAPI Workshop | `crapi/crapi-workshop` | `0.8.0` |
+| Targets-extended | crAPI Chatbot | `crapi/crapi-chatbot` | `0.8.0` |
+| Targets-extended | crAPI Web | `crapi/crapi-web` | `0.8.0` |
+| Targets-extended | crAPI Gateway | `crapi/gateway-service` | `0.8.0` |
+| Management | DefectDojo Django (initializer/uwsgi/celery) | `defectdojo/defectdojo-django` | `2.30.3` |
+| Management | DefectDojo Nginx | `defectdojo/defectdojo-nginx` | `2.30.3` |
+| Management | Dependency-Track API | `dependencytrack/apiserver` | `4.11.7` |
+| Management | Dependency-Track Frontend | `dependencytrack/frontend` | `4.11.7` |
+| Scanners | OWASP ZAP | `ghcr.io/zaproxy/zaproxy` | `2.16.1` |
+
+## Политика обновления версий
+
+### Кто обновляет
+- **Owner:** мейнтейнер курса (или назначенный DevSecOps-инженер) обновляет версии в `lab-infra/docker-compose.lab.yml` и синхронизирует документацию.
+- **Reviewer:** второй мейнтейнер (правило 4-eyes) подтверждает совместимость lab-сценариев перед merge.
+
+### Когда обновляем
+- **Планово:** 1 раз в месяц (первая рабочая неделя).
+- **Внепланово:** в течение 48 часов для критичных CVE (CVSS ≥ 9.0) в учебно-критичных сервисах.
+- **Заморозка:** за 7 дней до старта нового потока обучения — только security hotfix.
+
+### Как валидируем обратную совместимость
+1. Поднять стенд командой `docker compose -f lab-infra/docker-compose.lab.yml --profile all up -d`.
+2. Проверить healthcheck/доступность всех обязательных URL (Juice Shop, WrongSecrets, crAPI, DefectDojo, Dependency-Track).
+3. Прогнать smoke-сценарии модулей:
+   - Stage 1: секрет в git блокируется pre-commit.
+   - Stage 3: DAST baseline по Juice Shop и API доступность crAPI.
+   - Stage 5: импорт SARIF/JSON отчётов в DefectDojo и отображение findings.
+4. Сравнить результаты с предыдущим baseline (количество сервисов `healthy`, успешные импорты, отсутствие breaking changes в API).
+5. Обновить таблицу версий в этом README и зафиксировать изменения в PR (что обновили, почему, как проверили).
+
 ## Доступ к сервисам
 
 | Сервис                   | URL                   | Логин                     | Этап   |
