@@ -1,0 +1,576 @@
+# ============================================================
+# DevSecOps Lab · Единая среда
+# Нормализованная версия: полноценный crAPI + нормальный DefectDojo + D-Track на Postgres
+# ============================================================
+
+name: devsecops-lab
+
+services:
+  # ──────────────────────────────────────────────────────────
+  # 🎯 TARGETS
+  # ──────────────────────────────────────────────────────────
+
+  juice-shop:
+    image: bkimminich/juice-shop:v17.1.1
+    container_name: lab-juice-shop
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    profiles: [ targets, all ]
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:3000/rest/admin/application-version" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    labels:
+      lab.stage: "0,1,2,3,5"
+      lab.role: "primary-target"
+
+  wrong-secrets:
+    image: jeroenwillemsen/wrongsecrets:latest-no-vault
+    container_name: lab-wrong-secrets
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    profiles: [ targets, all ]
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    labels:
+      lab.stage: "1"
+      lab.role: "secrets-target"
+
+  # ──────────────────────────────────────────────────────────
+  # 🎯 crAPI (полный стек, а не урезанный)
+  # ──────────────────────────────────────────────────────────
+
+  crapi-postgres:
+    image: postgres:14
+    container_name: lab-crapi-postgres
+    command: [ "postgres", "-c", "max_connections=500" ]
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: crapisecretpassword
+      POSTGRES_DB: crapi
+    volumes:
+      - crapi-postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d crapi" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+
+  crapi-mongodb:
+    image: mongo:4.4
+    container_name: lab-crapi-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: crapisecretpassword
+    volumes:
+      - crapi-mongodb-data:/data/db
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "echo 'db.runCommand(\"ping\").ok' | mongo localhost:27017/test --quiet" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 20s
+
+  crapi-chromadb:
+    image: chromadb/chroma:latest
+    container_name: lab-crapi-chromadb
+    environment:
+      IS_PERSISTENT: "TRUE"
+    volumes:
+      - crapi-chromadb-data:/data
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD", "/bin/bash", "-c", "cat < /dev/null > /dev/tcp/localhost/8000" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 20s
+
+  crapi-mailhog:
+    image: crapi/mailhog:latest
+    container_name: lab-crapi-mailhog
+    user: root
+    environment:
+      MH_MONGO_URI: admin:crapisecretpassword@crapi-mongodb:27017
+      MH_STORAGE: mongodb
+    ports:
+      - "8025:8025"
+    depends_on:
+      crapi-mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "8025" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+
+  crapi-identity:
+    image: crapi/crapi-identity:latest
+    container_name: lab-crapi-identity
+    environment:
+      LOG_LEVEL: INFO
+      DB_NAME: crapi
+      DB_USER: admin
+      DB_PASSWORD: crapisecretpassword
+      DB_HOST: crapi-postgres
+      DB_PORT: "5432"
+      SERVER_PORT: "8080"
+      ENABLE_SHELL_INJECTION: "false"
+      JWT_SECRET: crapi
+      MAILHOG_HOST: crapi-mailhog
+      MAILHOG_PORT: "1025"
+      MAILHOG_DOMAIN: example.com
+      SMTP_HOST: smtp.example.com
+      SMTP_PORT: "587"
+      SMTP_EMAIL: user@example.com
+      SMTP_PASS: xxxxxxxxxxxxxx
+      SMTP_FROM: no-reply@example.com
+      SMTP_AUTH: "true"
+      SMTP_STARTTLS: "true"
+      JWT_EXPIRATION: "604800000"
+      ENABLE_LOG4J: "false"
+      API_GATEWAY_URL: https://api.mypremiumdealership.com
+      TLS_ENABLED: "false"
+      TLS_KEYSTORE_TYPE: PKCS12
+      TLS_KEYSTORE: classpath:certs/server.p12
+      TLS_KEYSTORE_PASSWORD: passw0rd
+      TLS_KEY_PASSWORD: passw0rd
+      TLS_KEY_ALIAS: identity
+    volumes:
+      - crapi-keys:/app/keys
+    depends_on:
+      crapi-postgres:
+        condition: service_healthy
+      crapi-mongodb:
+        condition: service_healthy
+      crapi-mailhog:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "/app/health.sh" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+
+  crapi-community:
+    image: crapi/crapi-community:latest
+    container_name: lab-crapi-community
+    environment:
+      LOG_LEVEL: INFO
+      IDENTITY_SERVICE: crapi-identity:8080
+      DB_NAME: crapi
+      DB_USER: admin
+      DB_PASSWORD: crapisecretpassword
+      DB_HOST: crapi-postgres
+      DB_PORT: "5432"
+      SERVER_PORT: "8087"
+      MONGO_DB_HOST: crapi-mongodb
+      MONGO_DB_PORT: "27017"
+      MONGO_DB_USER: admin
+      MONGO_DB_PASSWORD: crapisecretpassword
+      MONGO_DB_NAME: crapi
+      TLS_ENABLED: "false"
+      TLS_CERTIFICATE: certs/server.crt
+      TLS_KEY: certs/server.key
+    depends_on:
+      crapi-postgres:
+        condition: service_healthy
+      crapi-mongodb:
+        condition: service_healthy
+      crapi-identity:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "/app/health.sh" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+
+  crapi-workshop:
+    image: crapi/crapi-workshop:latest
+    container_name: lab-crapi-workshop
+    environment:
+      LOG_LEVEL: INFO
+      IDENTITY_SERVICE: crapi-identity:8080
+      DB_NAME: crapi
+      DB_USER: admin
+      DB_PASSWORD: crapisecretpassword
+      DB_HOST: crapi-postgres
+      DB_PORT: "5432"
+      SERVER_PORT: "8000"
+      MONGO_DB_HOST: crapi-mongodb
+      MONGO_DB_PORT: "27017"
+      MONGO_DB_USER: admin
+      MONGO_DB_PASSWORD: crapisecretpassword
+      MONGO_DB_NAME: crapi
+      SECRET_KEY: crapi
+      API_GATEWAY_URL: https://api.mypremiumdealership.com
+      TLS_ENABLED: "false"
+      TLS_CERTIFICATE: certs/server.crt
+      TLS_KEY: certs/server.key
+      FILES_LIMIT: "1000"
+      GUNICORN_WORKERS: "4"
+      GUNICORN_TIMEOUT: "120"
+      GUNICORN_MAX_REQUESTS: "1000"
+      GUNICORN_MAX_REQUESTS_JITTER: "50"
+      DB_CONN_MAX_AGE: "600"
+    depends_on:
+      crapi-postgres:
+        condition: service_healthy
+      crapi-mongodb:
+        condition: service_healthy
+      crapi-identity:
+        condition: service_healthy
+      crapi-community:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "/app/health.sh" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+
+  crapi-chatbot:
+    image: crapi/crapi-chatbot:latest
+    container_name: lab-crapi-chatbot
+    environment:
+      TLS_ENABLED: "false"
+      SERVER_PORT: "5002"
+      WEB_SERVICE: crapi-web
+      IDENTITY_SERVICE: crapi-identity:8080
+      DB_NAME: crapi
+      DB_USER: admin
+      DB_PASSWORD: crapisecretpassword
+      DB_HOST: crapi-postgres
+      DB_PORT: "5432"
+      MONGO_DB_HOST: crapi-mongodb
+      MONGO_DB_PORT: "27017"
+      MONGO_DB_USER: admin
+      MONGO_DB_PASSWORD: crapisecretpassword
+      MONGO_DB_NAME: crapi
+      API_USER: admin@example.com
+      API_PASSWORD: Admin!123
+      OPENAPI_SPEC: /app/resources/crapi-openapi-spec.json
+      CHATBOT_LLM_PROVIDER: openai
+      CHATBOT_EMBEDDINGS_DIMENSIONS: "1536"
+      CHROMA_HOST: crapi-chromadb
+      CHROMA_PORT: "8000"
+      MAX_CONTENT_LENGTH: "50000"
+    depends_on:
+      crapi-mongodb:
+        condition: service_healthy
+      crapi-identity:
+        condition: service_healthy
+      crapi-chromadb:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+
+  crapi-web:
+    image: crapi/crapi-web:latest
+    container_name: lab-crapi-web
+    ports:
+      - "8888:80"
+    environment:
+      COMMUNITY_SERVICE: crapi-community:8087
+      IDENTITY_SERVICE: crapi-identity:8080
+      WORKSHOP_SERVICE: crapi-workshop:8000
+      CHATBOT_SERVICE: crapi-chatbot:5002
+      MAILHOG_WEB_SERVICE: crapi-mailhog:8025
+      TLS_ENABLED: "false"
+    depends_on:
+      crapi-community:
+        condition: service_healthy
+      crapi-identity:
+        condition: service_healthy
+      crapi-workshop:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "curl 0.0.0.0:80/health" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+    labels:
+      lab.stage: "3"
+      lab.role: "api-target"
+
+  api.mypremiumdealership.com:
+    image: crapi/gateway-service:latest
+    container_name: lab-crapi-gateway
+    restart: unless-stopped
+    profiles: [ targets-extended, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -c 'echo -n \"GET / HTTP/1.1\\n\\n\" > /dev/tcp/127.0.0.1/443'" ]
+      interval: 15s
+      timeout: 15s
+      retries: 15
+      start_period: 15s
+
+  # ──────────────────────────────────────────────────────────
+  # 📊 MANAGEMENT
+  # ──────────────────────────────────────────────────────────
+
+  defectdojo-db:
+    image: postgres:16-alpine
+    container_name: lab-defectdojo-db
+    environment:
+      POSTGRES_DB: defectdojo
+      POSTGRES_USER: defectdojo
+      POSTGRES_PASSWORD: defectdojo_password
+    volumes:
+      - defectdojo-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles: [ management, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U defectdojo -d defectdojo" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  defectdojo-valkey:
+    image: valkey/valkey:7.2-alpine
+    container_name: lab-defectdojo-valkey
+    command: [ "valkey-server", "--save", "", "--appendonly", "no" ]
+    volumes:
+      - defectdojo-valkey-data:/data
+    restart: unless-stopped
+    profiles: [ management, all ]
+    healthcheck:
+      test: [ "CMD", "valkey-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  defectdojo-initializer:
+    image: defectdojo/defectdojo-django:latest
+    container_name: lab-defectdojo-initializer
+    depends_on:
+      defectdojo-db:
+        condition: service_healthy
+    entrypoint: [ "/wait-for-it.sh", "defectdojo-db:5432", "--", "/entrypoint-initializer.sh" ]
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:defectdojo_password@defectdojo-db:5432/defectdojo
+      DD_ADMIN_USER: admin
+      DD_ADMIN_MAIL: admin@defectdojo.local
+      DD_ADMIN_FIRST_NAME: Admin
+      DD_ADMIN_LAST_NAME: User
+      DD_ADMIN_PASSWORD: DevsecopsLab2024!
+      DD_INITIALIZE: "true"
+      DD_SECRET_KEY: lab-secret-key-change-in-production
+      DD_CREDENTIAL_AES_256_KEY: 0123456789abcdef0123456789abcdef
+    restart: "no"
+    profiles: [ management, all ]
+
+  defectdojo-uwsgi:
+    image: defectdojo/defectdojo-django:latest
+    container_name: lab-defectdojo-uwsgi
+    depends_on:
+      defectdojo-initializer:
+        condition: service_completed_successfully
+      defectdojo-db:
+        condition: service_healthy
+      defectdojo-valkey:
+        condition: service_healthy
+    entrypoint: [ "/wait-for-it.sh", "defectdojo-db:5432", "-t", "30", "--", "/entrypoint-uwsgi.sh" ]
+    environment:
+      DD_DEBUG: "False"
+      DD_ALLOWED_HOSTS: "*"
+      DD_DATABASE_URL: postgresql://defectdojo:defectdojo_password@defectdojo-db:5432/defectdojo
+      DD_CELERY_BROKER_URL: redis://defectdojo-valkey:6379/0
+      DD_SECRET_KEY: lab-secret-key-change-in-production
+      DD_CREDENTIAL_AES_256_KEY: 0123456789abcdef0123456789abcdef
+      DD_DATABASE_READINESS_TIMEOUT: "60"
+    volumes:
+      - defectdojo-media:/app/media
+    restart: unless-stopped
+    profiles: [ management, all ]
+
+  defectdojo-nginx:
+    image: defectdojo/defectdojo-nginx:latest
+    container_name: lab-defectdojo
+    depends_on:
+      defectdojo-uwsgi:
+        condition: service_started
+    environment:
+      NGINX_METRICS_ENABLED: "false"
+      DD_UWSGI_HOST: defectdojo-uwsgi
+      DD_UWSGI_PORT: "3031"
+    volumes:
+      - defectdojo-media:/usr/share/nginx/html/media
+    ports:
+      - "8081:8080"
+    restart: unless-stopped
+    profiles: [ management, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8080/ || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    labels:
+      lab.stage: "5"
+      lab.role: "vulnerability-management"
+
+  defectdojo-celery-beat:
+    image: defectdojo/defectdojo-django:latest
+    container_name: lab-defectdojo-celery-beat
+    depends_on:
+      defectdojo-initializer:
+        condition: service_completed_successfully
+      defectdojo-db:
+        condition: service_healthy
+      defectdojo-valkey:
+        condition: service_healthy
+    entrypoint: [ "/wait-for-it.sh", "defectdojo-db:5432", "-t", "30", "--", "/entrypoint-celery-beat.sh" ]
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:defectdojo_password@defectdojo-db:5432/defectdojo
+      DD_CELERY_BROKER_URL: redis://defectdojo-valkey:6379/0
+      DD_SECRET_KEY: lab-secret-key-change-in-production
+      DD_CREDENTIAL_AES_256_KEY: 0123456789abcdef0123456789abcdef
+      DD_DATABASE_READINESS_TIMEOUT: "60"
+    restart: unless-stopped
+    profiles: [ management, all ]
+
+  defectdojo-celery-worker:
+    image: defectdojo/defectdojo-django:latest
+    container_name: lab-defectdojo-celery-worker
+    depends_on:
+      defectdojo-initializer:
+        condition: service_completed_successfully
+      defectdojo-db:
+        condition: service_healthy
+      defectdojo-valkey:
+        condition: service_healthy
+    entrypoint: [ "/wait-for-it.sh", "defectdojo-db:5432", "-t", "30", "--", "/entrypoint-celery-worker.sh" ]
+    environment:
+      DD_DATABASE_URL: postgresql://defectdojo:defectdojo_password@defectdojo-db:5432/defectdojo
+      DD_CELERY_BROKER_URL: redis://defectdojo-valkey:6379/0
+      DD_SECRET_KEY: lab-secret-key-change-in-production
+      DD_CREDENTIAL_AES_256_KEY: 0123456789abcdef0123456789abcdef
+      DD_DATABASE_READINESS_TIMEOUT: "60"
+    volumes:
+      - defectdojo-media:/app/media
+    restart: unless-stopped
+    profiles: [ management, all ]
+
+  # ──────────────────────────────────────────────────────────
+  # Dependency-Track (официальная схема с внешним Postgres)
+  # ──────────────────────────────────────────────────────────
+
+  dtrack-postgres:
+    image: postgres:17-alpine
+    container_name: lab-dtrack-postgres
+    environment:
+      POSTGRES_DB: dtrack
+      POSTGRES_USER: dtrack
+      POSTGRES_PASSWORD: dtrack
+    volumes:
+      - dtrack-postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles: [ management, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U dtrack -d dtrack" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  dependency-track-api:
+    image: dependencytrack/apiserver:latest
+    container_name: lab-dtrack-api
+    depends_on:
+      dtrack-postgres:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    volumes:
+      - dtrack-data:/data
+    environment:
+      ALPINE_DATABASE_MODE: external
+      ALPINE_DATABASE_URL: jdbc:postgresql://dtrack-postgres:5432/dtrack
+      ALPINE_DATABASE_DRIVER: org.postgresql.Driver
+      ALPINE_DATABASE_USERNAME: dtrack
+      ALPINE_DATABASE_PASSWORD: dtrack
+    restart: unless-stopped
+    profiles: [ management, all ]
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8080/api/version >/dev/null 2>&1 || exit 1" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+    labels:
+      lab.stage: "2,5"
+      lab.role: "sbom-monitoring"
+
+  dependency-track-frontend:
+    image: dependencytrack/frontend:latest
+    container_name: lab-dtrack-ui
+    depends_on:
+      dependency-track-api:
+        condition: service_healthy
+    ports:
+      - "8083:8080"
+    environment:
+      API_BASE_URL: http://localhost:8082
+    restart: unless-stopped
+    profiles: [ management, all ]
+
+  # ──────────────────────────────────────────────────────────
+  # 🔍 SCANNERS
+  # ──────────────────────────────────────────────────────────
+
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    container_name: lab-zap
+    volumes:
+      - zap-reports:/zap/wrk
+    network_mode: "service:juice-shop"
+    profiles: [ scanners ]
+    labels:
+      lab.stage: "3"
+      lab.role: "dast-scanner"
+
+volumes:
+  crapi-postgres-data:
+    name: lab-crapi-postgres-data
+  crapi-mongodb-data:
+    name: lab-crapi-mongodb-data
+  crapi-chromadb-data:
+    name: lab-crapi-chromadb-data
+  crapi-keys:
+    name: lab-crapi-keys
+
+  defectdojo-db-data:
+    name: lab-defectdojo-db-data
+  defectdojo-valkey-data:
+    name: lab-defectdojo-valkey-data
+  defectdojo-media:
+    name: lab-defectdojo-media
+
+  dtrack-data:
+    name: lab-dtrack-data
+  dtrack-postgres-data:
+    name: lab-dtrack-postgres-data
+
+  zap-reports:
+    name: lab-zap-reports

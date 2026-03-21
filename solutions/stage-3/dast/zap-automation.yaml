@@ -1,0 +1,58 @@
+# ZAP Automation Framework · Эталонное решение
+# Для CI/CD: запускается как `zap.sh -cmd -autorun zap-automation.yaml`
+
+env:
+  contexts:
+    - name: "Juice Shop"
+      urls:
+        - "http://localhost:3000"
+      includePaths:
+        - "http://localhost:3000.*"
+      excludePaths:
+        - ".*\\.js$"
+        - ".*\\.css$"
+        - ".*\\.png$"
+        - ".*\\.jpg$"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # 1. Spider: обход приложения
+  - type: spider
+    parameters:
+      context: "Juice Shop"
+      maxDuration: 3
+      maxDepth: 5
+
+  # 2. AJAX Spider: для Angular SPA
+  - type: spiderAjax
+    parameters:
+      context: "Juice Shop"
+      maxDuration: 3
+
+  # 3. Passive scan: анализ заголовков, cookies, info disclosure
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  # 4. Active scan: инъекции, XSS, path traversal
+  - type: activeScan
+    parameters:
+      context: "Juice Shop"
+      maxRuleDurationInMins: 5
+      maxScanDurationInMins: 15
+
+  # 5. Отчёты
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportFile: "zap-report.json"
+      reportDir: "/zap/wrk"
+
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportFile: "zap-report.html"
+      reportDir: "/zap/wrk"

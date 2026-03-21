@@ -1,0 +1,221 @@
+# ============================================================
+# DevSecOps Lab · ГОСТ Р 56939-2024
+# MkDocs Material — GitHub Pages
+# ============================================================
+
+site_name: "DevSecOps Lab · ГОСТ Р 56939-2024"
+site_description: "Практический полигон для изучения безопасной разработки ПО"
+site_url: "https://Nefrit0n.github.io/devsecops-intern-labs/"
+repo_url: "https://github.com/Nefrit0n/devsecops-intern-labs"
+repo_name: "devsecops-intern-labs"
+edit_uri: "edit/main/"
+
+docs_dir: "site-docs"
+
+theme:
+  name: material
+  language: ru
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Тёмная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Светлая тема
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/shield-check
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  custom_dir: site-docs/overrides
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Nefrit0n/devsecops-intern-labs
+  generator: false
+  analytics:
+    provider: ""
+
+extra_css:
+  - site-docs/assets/extra.css
+
+copyright: "MIT License · Сделано для тех, кто хочет не просто запускать инструменты, а понимать зачем."
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.mark
+  - pymdownx.critic
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search:
+      lang: ru
+  - minify:
+      minify_html: true
+
+# ────────────────────────────────────────────────────────────
+# Навигация
+# ────────────────────────────────────────────────────────────
+
+nav:
+  - Главная:
+    - index.md
+    - "Быстрый старт": quickstart.md
+    - "Маршрут обучения": roadmap.md
+
+  - "🎯 Мишени":
+    - targets/README.md
+    - "Juice Shop": targets/juice-shop/README.md
+    - "WrongSecrets": targets/wrong-secrets/README.md
+    - "crAPI": targets/crapi/README.md
+    - "Kubernetes Goat": targets/kubernetes-goat/README.md
+
+  - "Этап 0 · Фундамент":
+    - stage-0/README.md
+    - "0.1 · Теория ГОСТа":
+      - stage-0/0.1-gost-theory/README.md
+      - "Задания": stage-0/0.1-gost-theory/tasks.md
+    - "0.2 · Моделирование угроз":
+      - stage-0/0.2-threat-modeling/README.md
+      - "Задания": stage-0/0.2-threat-modeling/tasks.md
+      - "Пример STRIDE": stage-0/0.2-threat-modeling/examples/stride-table.md
+      - "Шаблон STRIDE": stage-0/0.2-threat-modeling/templates/stride-template.md
+      - "Шаблон поверхности атаки": stage-0/0.2-threat-modeling/templates/attack-surface-template.md
+    - "0.3 · Требования безопасности":
+      - stage-0/0.3-security-requirements/README.md
+      - "Задания": stage-0/0.3-security-requirements/tasks.md
+      - "Шаблон требований": stage-0/0.3-security-requirements/templates/requirements-template.md
+
+  - "Этап 1 · Статика":
+    - stage-1-static-analysis/README.md
+    - "1.1 · SAST":
+      - stage-1-static-analysis/sast/README.md
+      - "Задания": stage-1-static-analysis/sast/tasks.md
+    - "1.2 · Secrets":
+      - stage-1-static-analysis/secrets/README.md
+      - "Задания": stage-1-static-analysis/secrets/tasks.md
+    - "1.3 · Linters":
+      - stage-1-static-analysis/linters/README.md
+      - "Задания": stage-1-static-analysis/linters/tasks.md
+
+  - "Этап 2 · Зависимости":
+    - stage-2-dependencies/README.md
+    - "2.1 · SCA":
+      - stage-2-dependencies/sca/README.md
+      - "Задания": stage-2-dependencies/sca/tasks.md
+    - "2.2 · SBOM":
+      - stage-2-dependencies/sbom/README.md
+      - "Задания": stage-2-dependencies/sbom/tasks.md
+    - "2.3 · Лицензии":
+      - stage-2-dependencies/license-audit/README.md
+      - "Задания": stage-2-dependencies/license-audit/tasks.md
+
+  - "Этап 3 · Динамика":
+    - stage-3-dynamic-analysis/README.md
+    - "3.1 · DAST":
+      - stage-3-dynamic-analysis/dast/README.md
+      - "Задания": stage-3-dynamic-analysis/dast/tasks.md
+    - "3.2 · Fuzzing":
+      - stage-3-dynamic-analysis/fuzzing/README.md
+      - "Задания": stage-3-dynamic-analysis/fuzzing/tasks.md
+    - "3.3 · API Testing":
+      - stage-3-dynamic-analysis/api-testing/README.md
+      - "Задания": stage-3-dynamic-analysis/api-testing/tasks.md
+
+  - "Этап 4 · Инфраструктура":
+    - stage-4-infrastructure/README.md
+    - "4.1 · Контейнеры":
+      - stage-4-infrastructure/container-sec/README.md
+      - "Задания": stage-4-infrastructure/container-sec/tasks.md
+    - "4.2 · IaC":
+      - stage-4-infrastructure/iac-sec/README.md
+      - "Задания": stage-4-infrastructure/iac-sec/tasks.md
+    - "4.3 · Kubernetes":
+      - stage-4-infrastructure/k8s-sec/README.md
+      - "Задания": stage-4-infrastructure/k8s-sec/tasks.md
+
+  - "Этап 5 · Пайплайн":
+    - stage-5-pipeline-integration/README.md
+    - "5.1 · CI/CD":
+      - stage-5-pipeline-integration/ci-cd/README.md
+      - "Задания": stage-5-pipeline-integration/ci-cd/tasks.md
+    - "5.2 · DefectDojo":
+      - stage-5-pipeline-integration/defectdojo/README.md
+      - "Задания": stage-5-pipeline-integration/defectdojo/tasks.md
+    - "5.3 · Quality Gates":
+      - stage-5-pipeline-integration/quality-gates/README.md
+      - "Задания": stage-5-pipeline-integration/quality-gates/tasks.md
+    - "5.4 · Supply Chain":
+      - stage-5-pipeline-integration/supply-chain/README.md
+      - "Задания": stage-5-pipeline-integration/supply-chain/tasks.md
+
+  - "📚 Справочник":
+    - "Обзор ГОСТа": docs/gost-56939-overview.md
+    - "Маппинг процессов": docs/gost-process-mapping.md
+    - "Глоссарий": docs/glossary.md
+    - "Ссылки": docs/further-reading.md
+    - "Чеклисты":
+      - checklists/README.md
+      - "Этап 0": checklists/stage-0-checklist.md
+      - "Этап 1": checklists/stage-1-checklist.md
+      - "Этап 2": checklists/stage-2-checklist.md
+      - "Этап 3": checklists/stage-3-checklist.md
+      - "Этап 4": checklists/stage-4-checklist.md
+      - "Этап 5": checklists/stage-5-checklist.md
+
+  - "🔑 Решения":
+    - solutions/README.md
+
+  - "🐳 Инфраструктура":
+    - lab-infra/README.md
+    - "Демо-записи": assets/demos/README.md

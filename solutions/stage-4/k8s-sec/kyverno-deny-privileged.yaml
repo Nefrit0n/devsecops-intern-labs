@@ -1,0 +1,37 @@
+# Kyverno: Deny Privileged Containers · Эталонное решение
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: deny-privileged-containers
+  annotations:
+    policies.kyverno.io/description: >-
+      Требование E-03: K8s pod НЕ ДОЛЖЕН запускаться с privileged: true
+spec:
+  validationFailureAction: Enforce
+  rules:
+  - name: deny-privileged
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Privileged контейнеры запрещены (Требование E-03)"
+      pattern:
+        spec:
+          containers:
+          - securityContext:
+              privileged: "!true"
+  - name: deny-privilege-escalation
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Privilege escalation запрещена"
+      pattern:
+        spec:
+          containers:
+          - securityContext:
+              allowPrivilegeEscalation: "false"

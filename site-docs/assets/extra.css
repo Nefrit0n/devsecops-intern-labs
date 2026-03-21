@@ -1,0 +1,63 @@
+/* Hero section */
+.hero {
+  text-align: center;
+  padding: 2rem 0;
+}
+.hero h2 {
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--md-default-fg-color--light);
+  margin-bottom: 1.5rem;
+}
+.hero-cta {
+  text-align: center;
+  padding: 1rem 0 2rem;
+}
+
+/* Grid cards — landing page */
+.grid.cards > ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.8rem;
+  padding: 0;
+  list-style: none;
+}
+.grid.cards > ul > li {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.5rem;
+  padding: 1.2rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.grid.cards > ul > li:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Stage colors in nav */
+[data-md-color-scheme="default"] .md-nav__link--active {
+  font-weight: 500;
+}
+
+/* Admonition tweaks */
+.md-typeset .admonition,
+.md-typeset details {
+  font-size: 0.85rem;
+}
+
+/* Button stretch */
+.md-button--stretch {
+  width: 100%;
+  max-width: 24rem;
+}
+
+/* Code blocks */
+.md-typeset pre > code {
+  font-size: 0.82rem;
+}
+
+/* Tables — compact */
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+}

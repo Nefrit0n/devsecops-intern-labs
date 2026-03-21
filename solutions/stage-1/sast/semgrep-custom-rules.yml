@@ -1,0 +1,55 @@
+# Кастомные Semgrep-правила для Juice Shop · Эталонное решение
+# Каждое правило привязано к требованию из security-requirements.md
+
+rules:
+  # Требование T-01: Параметризованные SQL-запросы
+  - id: juice-shop-sql-string-concat
+    message: >
+      Требование T-01: SQL-запрос собран конкатенацией строк.
+      Используйте параметризованные запросы через Sequelize ORM.
+    severity: ERROR
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+        - pattern: |
+            $DB.query("..." + $INPUT + "...")
+        - pattern: |
+            $DB.query(`...${$INPUT}...`)
+    metadata:
+      requirement: T-01
+      cwe: CWE-89
+      owasp: A03:2021
+
+  # Требование I-02: Нет секретов в коде
+  - id: juice-shop-hardcoded-secret
+    message: >
+      Требование I-02: Обнаружен hardcoded секрет.
+      Используйте переменные окружения или vault.
+    severity: ERROR
+    languages: [javascript, typescript]
+    patterns:
+      - pattern-either:
+        - pattern: |
+            $VAR = "..."
+        - pattern: |
+            const $VAR = "..."
+    metavariable-regex:
+      metavariable: $VAR
+      regex: ".*(password|secret|api_?key|token|private_?key).*"
+    metadata:
+      requirement: I-02
+      cwe: CWE-798
+
+  # Требование T-02: Санитизация пользовательского ввода
+  - id: juice-shop-innerHTML-usage
+    message: >
+      Требование T-02: Использование innerHTML с пользовательским вводом.
+      Используйте textContent или DOMPurify.sanitize().
+    severity: WARNING
+    languages: [javascript, typescript]
+    pattern: |
+      $EL.innerHTML = $INPUT
+    metadata:
+      requirement: T-02
+      cwe: CWE-79
+      owasp: A03:2021

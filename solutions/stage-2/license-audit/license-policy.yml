@@ -1,0 +1,37 @@
+# Лицензионная политика · Эталонное решение
+
+# ✅ Whitelist — разрешённые лицензии (permissive)
+whitelist:
+  - MIT
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - 0BSD
+  - Unlicense
+  - CC0-1.0
+  - CC-BY-3.0
+  - CC-BY-4.0
+  - Python-2.0
+  - PSF-2.0
+  - Zlib
+  - BlueOak-1.0.0
+
+# ❌ Blacklist — запрещённые (блокируют CI)
+blacklist:
+  - GPL-2.0-only
+  - GPL-2.0-or-later
+  - GPL-3.0-only
+  - GPL-3.0-or-later
+  - AGPL-1.0-only
+  - AGPL-3.0-only
+  - AGPL-3.0-or-later
+  - SSPL-1.0
+  - EUPL-1.2
+
+# ⚠️ Review required — всё остальное
+# Пограничные случаи (weak copyleft):
+#   LGPL-2.1 — ОК если используем как библиотеку, не модифицируем
+#   MPL-2.0 — ОК если не модифицируем файлы под MPL
+#   Artistic-2.0 — обычно ОК
+# Для каждого: license_finder approval add <pkg> --why "обоснование"

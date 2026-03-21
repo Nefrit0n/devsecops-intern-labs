@@ -1,0 +1,36 @@
+# Кастомный Nuclei шаблон · Эталонное решение
+# Привязка к требованию I-04: скрытые эндпоинты не должны быть доступны
+
+id: juice-shop-hidden-endpoints
+
+info:
+  name: Juice Shop Hidden Endpoints Exposed
+  author: devsecops-lab
+  severity: medium
+  description: |
+    Требование I-04: /ftp, /encryptionkeys, /metrics не должны быть
+    доступны без аутентификации. Проверяем доступность.
+  tags: juice-shop,access-control,information-disclosure
+  reference:
+    - https://owasp.org/www-project-juice-shop/
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/ftp"
+      - "{{BaseURL}}/encryptionkeys"
+      - "{{BaseURL}}/metrics"
+      - "{{BaseURL}}/api-docs"
+      - "{{BaseURL}}/promotion"
+
+    matchers-condition: or
+    matchers:
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: regex
+        part: body
+        regex:
+          - '(?i)(password|secret|key|token|admin)'

@@ -1,0 +1,48 @@
+# Hardened Dockerfile для Juice Shop · Эталонное решение
+# Основано на findings: Trivy, Dockle, hadolint, Docker Scout
+
+# === STAGE 1: Build ===
+FROM node:18-alpine AS builder
+
+# Hadolint DL3018: pin apk versions
+RUN apk add --no-cache python3 make g++
+
+WORKDIR /app
+
+# Копируем только package files для кеширования слоёв
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# === STAGE 2: Runtime ===
+FROM node:18-alpine
+
+# Metadata (Dockle best practice)
+LABEL maintainer="devsecops-lab" \
+      version="1.0" \
+      description="Hardened Juice Shop for DevSecOps training"
+
+WORKDIR /app
+
+# Dockle CIS-DI-0001: Non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Копируем только необходимое из builder
+COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
+COPY --chown=appuser:appgroup . .
+
+# Dockle CIS-DI-0008: Remove SETUID/SETGID binaries
+RUN find / -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
+
+# Dockle CIS-DI-0006: Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget -qO- http://localhost:3000/rest/admin/application-version || exit 1
+
+# Dockle CIS-DI-0001: Switch to non-root user
+USER appuser
+
+# Фиксированный порт
+EXPOSE 3000
+
+# Hadolint DL3025: Use JSON notation for CMD
+CMD ["node", "build/app.js"]

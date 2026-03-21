@@ -1,88 +1,222 @@
-.PHONY: help install-tools install-python-deps run-app build-app full-scan full-scan-warn full-scan-gate secret-scan sca-scan sast-scan container-scan sbom
+# ============================================================
+# DevSecOps Lab · ГОСТ Р 56939-2024
+# ============================================================
+#
+# make help        — показать все команды
+# make lab-up      — поднять мишени
+# make lab-all     — поднять всё
+# make stage1-sast — запустить SAST-сканеры
+#
+# ============================================================
 
-help:
-	@echo "Доступные команды:"
-	@echo "  make install-tools    - установка необходимого ПО для лабораторных (Linux/macOS)"
-	@echo "  make install-python-deps - установка Python-зависимостей (с --break-system-packages)"
-	@echo "  make run-app          - запуск Flask-приложения локально"
-	@echo "  make build-app        - сборка Docker-образа vulnerable-app"
-	@echo "  make secret-scan      - запуск gitleaks"
-	@echo "  make sca-scan         - запуск trivy fs"
-	@echo "  make sast-scan        - запуск opengrep"
-	@echo "  make container-scan   - запуск trivy image (если образ существует)"
-	@echo "  make sbom             - генерация SBOM через syft"
-	@echo "  make full-scan        - полный локальный security pipeline (по умолчанию gate)"
-	@echo "  make full-scan-warn   - pipeline в информативном warn-only режиме"
-	@echo "  make full-scan-gate   - pipeline в blocking quality gate режиме"
+COMPOSE := docker compose -f lab-infra/docker-compose.lab.yml
+JUICE_SHOP_SRC := targets/juice-shop/src
+JUICE_SHOP_URL := http://localhost:3000
+REPORTS := reports
 
-install-tools:
-	@set -e; \
-	if command -v apt-get >/dev/null 2>&1; then \
-		echo "[install-tools] Detected apt-get (Linux)."; \
-		sudo apt-get update; \
-		sudo apt-get install -y git docker.io python3 python3-pip bash curl; \
-		echo "[install-tools] Installing Trivy..."; \
-		curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh; \
-		sudo mv ./bin/trivy /usr/local/bin/trivy; \
-		echo "[install-tools] Installing Syft..."; \
-		curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin; \
-		echo "[install-tools] Installing Gitleaks..."; \
-		GL_VERSION=$$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -n1); \
-		curl -fsSL -o /tmp/gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v$$GL_VERSION/gitleaks_$$GL_VERSION_linux_x64.tar.gz; \
-		tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks; \
-		sudo install -m 0755 /tmp/gitleaks /usr/local/bin/gitleaks; \
-		echo "[install-tools] Installing OpenGrep..."; \
-		OG_VERSION=$$(curl -fsSL https://api.github.com/repos/opengrep/opengrep/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -n1); \
-		ARCH=$$(uname -m); \
-		if [ "$$ARCH" = "x86_64" ]; then OG_ASSET="opengrep_manylinux_x86"; elif [ "$$ARCH" = "aarch64" ] || [ "$$ARCH" = "arm64" ]; then OG_ASSET="opengrep_manylinux_aarch64"; else echo "Unsupported arch for OpenGrep: $$ARCH"; exit 1; fi; \
-		curl -fsSL -o /tmp/opengrep https://github.com/opengrep/opengrep/releases/download/v$$OG_VERSION/$$OG_ASSET; \
-		sudo install -m 0755 /tmp/opengrep /usr/local/bin/opengrep; \
-	elif command -v brew >/dev/null 2>&1; then \
-		echo "[install-tools] Detected Homebrew (macOS/Linuxbrew)."; \
-		brew install git docker python bash trivy gitleaks syft; \
-		echo "[install-tools] Installing OpenGrep from GitHub release..."; \
-		OG_VERSION=$$(curl -fsSL https://api.github.com/repos/opengrep/opengrep/releases/latest | sed -n 's/.*"tag_name": *"v\([^"]*\)".*/\1/p' | head -n1); \
-		ARCH=$$(uname -m); \
-		if [ "$$ARCH" = "x86_64" ]; then OG_TAR="opengrep-core_osx_x86.tar.gz"; else OG_TAR="opengrep-core_osx_aarch64.tar.gz"; fi; \
-		curl -fsSL -o /tmp/opengrep.tar.gz https://github.com/opengrep/opengrep/releases/download/v$$OG_VERSION/$$OG_TAR; \
-		tar -xzf /tmp/opengrep.tar.gz -C /tmp; \
-		sudo install -m 0755 /tmp/opengrep-core /usr/local/bin/opengrep; \
+.PHONY: help
+help: ## Показать все команды
+	@echo ""
+	@echo "  DevSecOps Lab · Makefile"
+	@echo "  ════════════════════════"
+	@echo ""
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+
+# ────────────────────────────────────────────────────────────
+# 🐳 Инфраструктура
+# ────────────────────────────────────────────────────────────
+
+.PHONY: lab-up lab-all lab-management lab-down lab-reset lab-status
+
+lab-up: ## Поднять мишени (Juice Shop + WrongSecrets)
+	$(COMPOSE) --profile targets up -d
+	@echo "\n✅ Juice Shop:    http://localhost:3000"
+	@echo "✅ WrongSecrets:  http://localhost:8080"
+
+lab-all: ## Поднять всё (мишени + DefectDojo + Dependency-Track)
+	$(COMPOSE) --profile all up -d
+	@echo "\n✅ Juice Shop:       http://localhost:3000"
+	@echo "✅ WrongSecrets:     http://localhost:8080"
+	@echo "✅ DefectDojo:       http://localhost:8081  (admin / DevsecopsLab2024!)"
+	@echo "✅ Dependency-Track: http://localhost:8083  (admin / admin)"
+	@echo "\n⏳ DefectDojo может инициализироваться ~3 мин"
+
+lab-management: ## Поднять только DefectDojo + Dependency-Track
+	$(COMPOSE) --profile management up -d
+
+lab-down: ## Остановить всё
+	$(COMPOSE) --profile all down
+
+lab-reset: ## Остановить и удалить все данные (полный сброс)
+	$(COMPOSE) --profile all down -v
+	@echo "✅ Все данные удалены"
+
+lab-status: ## Статус контейнеров
+	$(COMPOSE) --profile all ps
+
+# ────────────────────────────────────────────────────────────
+# 📥 Подготовка
+# ────────────────────────────────────────────────────────────
+
+.PHONY: clone-juice-shop check-tools setup
+
+clone-juice-shop: ## Клонировать исходный код Juice Shop (для SAST)
+	@if [ ! -d "$(JUICE_SHOP_SRC)" ]; then \
+		git clone --depth 1 https://github.com/juice-shop/juice-shop.git $(JUICE_SHOP_SRC); \
+		echo "✅ Juice Shop source cloned"; \
 	else \
-		echo "[install-tools] ERROR: supported package manager not found (apt-get or brew)."; \
-		exit 1; \
-	fi; \
-	$(MAKE) install-python-deps
+		echo "ℹ️  Juice Shop source already exists"; \
+	fi
 
-install-python-deps:
-	python3 -m pip install --break-system-packages -U pip
-	python3 -m pip install --break-system-packages -r vulnerable-app/requirements.txt
+check-tools: ## Проверить установленные инструменты
+	@chmod +x scripts/check-tools.sh && ./scripts/check-tools.sh
 
-run-app:
-	python3 vulnerable-app/app.py
+setup: ## Установить базовые инструменты (Python + npm)
+	@chmod +x scripts/setup.sh && ./scripts/setup.sh
 
-build-app:
-	docker build -t vulnerable-app:lab ./vulnerable-app
+# ────────────────────────────────────────────────────────────
+# 🔬 Этап 1 — Статический анализ
+# ────────────────────────────────────────────────────────────
 
-secret-scan:
-	bash scanner-scripts/run_secret_scan.sh .
+.PHONY: stage1-sast stage1-secrets stage1-linters stage1
 
-sca-scan:
-	bash scanner-scripts/run_sca_scan.sh .
+$(REPORTS):
+	@mkdir -p $(REPORTS)
 
-sast-scan:
-	bash scanner-scripts/run_sast_scan.sh ./vulnerable-app
+stage1-sast: clone-juice-shop $(REPORTS) ## Этап 1: SAST (Semgrep + Bandit + njsscan)
+	@echo "\n🔬 Semgrep..."
+	semgrep --config auto --sarif -o $(REPORTS)/semgrep.sarif $(JUICE_SHOP_SRC) || true
+	@echo "\n🔬 njsscan..."
+	njsscan --sarif -o $(REPORTS)/njsscan.sarif $(JUICE_SHOP_SRC) || true
+	@echo "\n✅ Отчёты: $(REPORTS)/semgrep.sarif, $(REPORTS)/njsscan.sarif"
 
-container-scan:
-	bash scanner-scripts/run_container_scan.sh vulnerable-app:lab
+stage1-secrets: clone-juice-shop $(REPORTS) ## Этап 1: Secrets (Gitleaks + TruffleHog)
+	@echo "\n🔑 Gitleaks..."
+	gitleaks detect --source $(JUICE_SHOP_SRC) --report-format json \
+		--report-path $(REPORTS)/gitleaks.json || true
+	@echo "\n🔑 TruffleHog..."
+	trufflehog git file://$(JUICE_SHOP_SRC) --json > $(REPORTS)/trufflehog.json 2>/dev/null || true
+	@echo "\n✅ Отчёты: $(REPORTS)/gitleaks.json, $(REPORTS)/trufflehog.json"
 
-sbom:
-	bash scanner-scripts/generate_sbom.sh ./vulnerable-app
+stage1-linters: clone-juice-shop $(REPORTS) ## Этап 1: Linters (hadolint + Ruff)
+	@echo "\n📏 hadolint..."
+	@if [ -f "$(JUICE_SHOP_SRC)/Dockerfile" ]; then \
+		hadolint $(JUICE_SHOP_SRC)/Dockerfile --format json > $(REPORTS)/hadolint.json || true; \
+	else \
+		echo "  ⚠️  Dockerfile not found"; \
+	fi
+	@echo "\n✅ Отчёт: $(REPORTS)/hadolint.json"
 
-full-scan:
-	WARN_ONLY=false FAIL_ON_ANY_ERROR=true bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+stage1: stage1-sast stage1-secrets stage1-linters ## Этап 1: Все проверки
 
-full-scan-warn:
-	WARN_ONLY=true FAIL_ON_ANY_ERROR=false bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+# ────────────────────────────────────────────────────────────
+# 📦 Этап 2 — Зависимости
+# ────────────────────────────────────────────────────────────
 
-full-scan-gate:
-	WARN_ONLY=false FAIL_ON_ANY_ERROR=true bash scanner-scripts/full_local_pipeline.sh . vulnerable-app:lab ./vulnerable-app
+.PHONY: stage2-sca stage2-sbom stage2
+
+stage2-sca: clone-juice-shop $(REPORTS) ## Этап 2: SCA (Trivy + Grype + npm audit)
+	@echo "\n🔍 Trivy fs..."
+	trivy fs $(JUICE_SHOP_SRC) --format json --output $(REPORTS)/trivy-fs.json \
+		--severity CRITICAL,HIGH || true
+	@echo "\n🔍 Trivy image..."
+	trivy image bkimminich/juice-shop:v17.1.1 --format json \
+		--output $(REPORTS)/trivy-image.json || true
+	@echo "\n🔍 npm audit..."
+	@cd $(JUICE_SHOP_SRC) && npm audit --json > ../../../$(REPORTS)/npm-audit.json 2>/dev/null || true
+	@echo "\n✅ Отчёты в $(REPORTS)/"
+
+stage2-sbom: clone-juice-shop $(REPORTS) ## Этап 2: SBOM (Syft → CycloneDX + SPDX)
+	@echo "\n📦 Syft (CycloneDX)..."
+	syft dir:$(JUICE_SHOP_SRC) -o cyclonedx-json > $(REPORTS)/sbom.cdx.json || true
+	@echo "\n📦 Syft (SPDX)..."
+	syft dir:$(JUICE_SHOP_SRC) -o spdx-json > $(REPORTS)/sbom.spdx.json || true
+	@echo "\n📦 Grype (vuln scan по SBOM)..."
+	grype sbom:$(REPORTS)/sbom.cdx.json --output json > $(REPORTS)/grype.json || true
+	@echo "\n✅ SBOM + vuln scan в $(REPORTS)/"
+
+stage2: stage2-sca stage2-sbom ## Этап 2: Все проверки
+
+# ────────────────────────────────────────────────────────────
+# 🌐 Этап 3 — Динамический анализ
+# ────────────────────────────────────────────────────────────
+
+.PHONY: stage3-dast stage3-nuclei stage3
+
+stage3-dast: $(REPORTS) ## Этап 3: DAST (ZAP baseline)
+	@echo "\n🌐 ZAP baseline scan..."
+	docker run --rm --network=host \
+		-v $(PWD)/$(REPORTS):/zap/wrk \
+		ghcr.io/zaproxy/zaproxy:stable \
+		zap-baseline.py -t $(JUICE_SHOP_URL) \
+		-J /zap/wrk/zap-baseline.json || true
+	@echo "\n✅ Отчёт: $(REPORTS)/zap-baseline.json"
+
+stage3-nuclei: $(REPORTS) ## Этап 3: Nuclei scan
+	@echo "\n🎯 Nuclei..."
+	nuclei -u $(JUICE_SHOP_URL) -severity critical,high \
+		-jsonl -o $(REPORTS)/nuclei.json || true
+	@echo "\n✅ Отчёт: $(REPORTS)/nuclei.json"
+
+stage3: stage3-dast stage3-nuclei ## Этап 3: Все проверки (нужен запущенный Juice Shop!)
+
+# ────────────────────────────────────────────────────────────
+# 🏗️ Этап 4 — Инфраструктура
+# ────────────────────────────────────────────────────────────
+
+.PHONY: stage4-container stage4-iac stage4
+
+stage4-container: $(REPORTS) ## Этап 4: Container security (Trivy + Dockle)
+	@echo "\n📦 Trivy image (full)..."
+	trivy image bkimminich/juice-shop:v17.1.1 --format json \
+		--output $(REPORTS)/trivy-image-full.json || true
+	@echo "\n📦 Dockle..."
+	dockle bkimminich/juice-shop:v17.1.1 --format json \
+		--output $(REPORTS)/dockle.json || true
+	@echo "\n✅ Отчёты в $(REPORTS)/"
+
+stage4-iac: $(REPORTS) ## Этап 4: IaC security (Checkov)
+	@echo "\n🏗️ Checkov..."
+	checkov -d . --framework dockerfile,kubernetes --output json \
+		> $(REPORTS)/checkov.json || true
+	@echo "\n✅ Отчёт: $(REPORTS)/checkov.json"
+
+stage4: stage4-container stage4-iac ## Этап 4: Все проверки
+
+# ────────────────────────────────────────────────────────────
+# 🚀 Этап 5 — Пайплайн
+# ────────────────────────────────────────────────────────────
+
+.PHONY: stage5-import stage5-gate
+
+stage5-import: $(REPORTS) ## Этап 5: Импорт всех отчётов в DefectDojo
+	@if [ -f "solutions/stage-5/defectdojo/import-reports.sh" ]; then \
+		DD_URL=http://localhost:8081 bash solutions/stage-5/defectdojo/import-reports.sh; \
+	else \
+		echo "⚠️  import-reports.sh не найден. Создайте его в stage-5."; \
+	fi
+
+stage5-gate: $(REPORTS) ## Этап 5: Quality gate check
+	@if [ -f "solutions/stage-5/quality-gates/quality-gate.py" ]; then \
+		python solutions/stage-5/quality-gates/quality-gate.py \
+			--sarif $(REPORTS)/semgrep.sarif \
+			--trivy $(REPORTS)/trivy-fs.json; \
+	else \
+		echo "⚠️  quality-gate.py не найден. Создайте его в stage-5."; \
+	fi
+
+# ────────────────────────────────────────────────────────────
+# 🔄 Полный прогон
+# ────────────────────────────────────────────────────────────
+
+.PHONY: scan-all
+
+scan-all: stage1 stage2 stage3 stage4 ## Запустить ВСЕ сканеры (этапы 1–4)
+	@echo ""
+	@echo "════════════════════════════════════════"
+	@echo "  ✅ Все сканы завершены"
+	@echo "  📂 Отчёты: $(REPORTS)/"
+	@echo "  📊 Следующий шаг: make stage5-import"
+	@echo "════════════════════════════════════════"

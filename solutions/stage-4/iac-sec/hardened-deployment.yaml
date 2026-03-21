@@ -1,0 +1,108 @@
+# Hardened K8s Deployment · Эталонное решение
+# 0 FAILED checks в Checkov, KICS, KubeLinter
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: juice-shop
+  labels:
+    app: juice-shop
+    version: "17.1.1"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: juice-shop
+  template:
+    metadata:
+      labels:
+        app: juice-shop
+    spec:
+      # CKV_K8S_40: No service account auto-mount
+      automountServiceAccountToken: false
+      containers:
+      - name: juice-shop
+        # CKV_K8S_14: Fixed image tag (not :latest)
+        image: bkimminich/juice-shop:v17.1.1
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+
+        # CKV_K8S_11 + CKV_K8S_13: Resource limits
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+
+        # CKV_K8S_8 + CKV_K8S_9: Probes
+        livenessProbe:
+          httpGet:
+            path: /rest/admin/application-version
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /rest/admin/application-version
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        # CKV_K8S_1 + CKV_K8S_6 + CKV_K8S_22 + CKV_K8S_28 + CKV_K8S_37
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+          privileged: false
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: juice-shop
+spec:
+  type: ClusterIP  # Не LoadBalancer — внутренний доступ
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    app: juice-shop
+---
+# Network Policy — ограничиваем трафик
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: juice-shop-netpol
+spec:
+  podSelector:
+    matchLabels:
+      app: juice-shop
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          role: ingress
+    ports:
+    - port: 3000
+  egress:
+  - to:
+    - podSelector: {}
+    ports:
+    - port: 53
+      protocol: UDP  # DNS

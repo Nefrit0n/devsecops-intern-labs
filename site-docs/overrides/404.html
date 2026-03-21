@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>404 · Страница не найдена</h1>
+<p>Возможно, вы ищете один из этапов курса:</p>
+<ul>
+  <li><a href="{{ config.site_url }}">Главная</a></li>
+  <li><a href="{{ config.site_url }}site-docs/quickstart/">Быстрый старт</a></li>
+  <li><a href="{{ config.site_url }}stage-0/">Этап 0 · Фундамент</a></li>
+</ul>
+{% endblock %}

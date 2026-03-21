@@ -1,0 +1,20 @@
+# Kyverno: Deny Latest Tag · Эталонное решение
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: deny-latest-tag
+spec:
+  validationFailureAction: Enforce
+  rules:
+  - name: deny-latest-tag
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Тег :latest запрещён — используйте конкретную версию"
+      pattern:
+        spec:
+          containers:
+          - image: "!*:latest"

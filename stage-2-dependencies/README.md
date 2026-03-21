@@ -1,0 +1,169 @@
+# Этап 2 · Зависимости и состав ПО
+
+> *«Что тянем из интернета и насколько это безопасно»*
+
+**Время:** ~10 часов · **Сложность:** средняя
+**Мишень:** Juice Shop (npm-зависимости, Docker-образ)
+**Процессы ГОСТа:** 5.10 (композиционный анализ), 5.4 (управление конфигурацией), 5.23 (управление поставщиками)
+
+---
+
+## Зачем анализировать зависимости
+
+В декабре 2021 года мир узнал про Log4Shell — критическую уязвимость в библиотеке Log4j. Тысячи компаний не могли быстро ответить на простой вопрос: **«Используем ли мы Log4j?»** Потому что Log4j — это transitive dependency. Вы не ставили её напрямую. Она приехала внутри другой библиотеки, которая приехала внутри третьей.
+
+Juice Shop — идеальная мишень для этого этапа. У него **~1500 npm-зависимостей** (прямых + transitive), и среди них десятки с известными CVE. Это типичное Node.js-приложение реального мира.
+
+**ГОСТ Р 56939-2024** впервые выделил **композиционный анализ (5.10)** в отдельный процесс. Раньше этого не было. Добавили после того, как supply chain атаки стали нормой:
+
+| Год | Инцидент | Что произошло |
+|-----|----------|--------------|
+| 2021 | Log4Shell | 0-day в transitive dependency, 10 из 10 по CVSS |
+| 2021 | ua-parser-js | Популярный npm-пакет захвачен, добавлен криптомайнер |
+| 2022 | node-ipc | Мейнтейнер добавил вайпер в протест, 1M+ загрузок/неделю |
+| 2023 | PyTorch nightly | Скомпрометирован через dependency confusion |
+
+---
+
+## Три слоя анализа
+
+Этот этап — не просто «запусти SCA-сканер». Мы разбираем три связанных, но разных слоя:
+
+### 🔍 Слой 1 · SCA — найти уязвимые зависимости
+*«Есть ли среди наших 1500 пакетов те, у которых известные CVE?»*
+
+Инструменты: **Trivy**, **OWASP Dependency-Check**, **Grype**, **npm audit / pip-audit**
+
+### 📦 Слой 2 · SBOM — составить полную опись
+*«Что именно входит в наше приложение? Каждый пакет, каждая версия.»*
+
+Инструменты: **Syft**, **cdxgen**, **Dependency-Track**
+
+### ⚖️ Слой 3 · License audit — проверить лицензии
+*«Нет ли среди зависимостей GPL-кода, который заставит нас открыть свой код?»*
+
+Инструменты: **Trivy license**, **ScanCode Toolkit**, **license_finder**
+
+---
+
+## Арсенал
+
+### 🔍 SCA — поиск уязвимостей в зависимостях
+
+| Инструмент | Зачем нужен | Суперсила |
+|------------|-------------|-----------|
+| **Trivy** | Универсальный сканер | SCA + контейнеры + IaC + SBOM в одном CLI |
+| **OWASP Dep-Check** | Эталон OWASP | Привязка к NVD, HTML-отчёт для аудитора |
+| **Grype** | Быстрый vuln scan поверх SBOM | Связка Syft→Grype: архитектура «генератор + сканер» |
+| **npm audit / pip-audit** | Встроенный в пакетный менеджер | Zero setup, стартовая точка |
+
+### 📦 SBOM — спецификация состава ПО
+
+| Инструмент | Зачем нужен | Суперсила |
+|------------|-------------|-----------|
+| **Syft** | Генератор SBOM №1 | CycloneDX + SPDX, код + контейнеры |
+| **cdxgen** | Официальный OWASP CycloneDX | Глубокий transitive analysis |
+| **Dependency-Track** | Платформа управления SBOM | Дашборд, мониторинг, политики, уведомления |
+
+### ⚖️ License audit — анализ лицензий
+
+| Инструмент | Зачем нужен | Суперсила |
+|------------|-------------|-----------|
+| **Trivy license** | Быстрый чек лицензий | Уже установлен, zero config |
+| **ScanCode Toolkit** | Глубокий file-level scan | Находит лицензии внутри файлов, не только в manifest |
+| **license_finder** | Policy-as-code | Whitelist/blacklist, блокировка сборки в CI |
+
+---
+
+## Порядок прохождения
+
+| #   | Модуль | Время | Результат |
+|-----|--------|-------|-----------|
+| 2.1 | SCA — поиск уязвимостей | ~4 ч | Отчёты 4 сканеров, сравнение, triage findings |
+| 2.2 | SBOM — опись состава | ~3 ч | SBOM в CycloneDX + SPDX, Dependency-Track дашборд |
+| 2.3 | License audit | ~3 ч | Лицензионная политика, отчёт compliance |
+
+---
+
+## Подготовка
+
+```bash
+# Исходный код Juice Shop (если ещё не клонирован)
+git clone --depth 1 https://github.com/juice-shop/juice-shop.git targets/juice-shop/src
+
+# Установка инструментов
+
+# Trivy (Linux)
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+
+# Grype + Syft (Anchore)
+curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh
+curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh
+
+# OWASP Dependency-Check
+# Через Docker (проще всего):
+docker pull owasp/dependency-check
+
+# cdxgen
+npm install -g @cyclonedx/cdxgen
+
+# pip-audit
+pip install pip-audit
+
+# ScanCode Toolkit
+pip install scancode-toolkit
+
+# license_finder
+gem install license_finder  # или через Docker
+
+# Dependency-Track
+# docker-compose в stage-2-dependencies/sbom/configs/
+```
+
+---
+
+## Главный принцип этапа
+
+На этапе 1 вы искали баги *в своём коде*. На этапе 2 вы ищете баги *в чужом коде*, который ваш код использует. И этого чужого кода — 80–90% от всего приложения.
+
+Ключевой навык: не просто «найти CVE», а **принять решение**:
+- Обновить зависимость? (может сломать совместимость)
+- Принять риск? (CVE не эксплуатируема в нашем контексте)
+- Заменить зависимость? (есть безопасная альтернатива)
+- Запатчить вручную? (форкнуть и починить)
+
+---
+
+## Начинаем
+
+👉 [`sca/`](sca/)
+
+---
+
+## Артефакты этапа
+
+```
+stage-2-dependencies/
+├── sca/
+│   ├── trivy-report.json             ← отчёт Trivy
+│   ├── dependency-check-report.html  ← отчёт OWASP Dep-Check
+│   ├── grype-report.json             ← отчёт Grype
+│   ├── npm-audit-report.json         ← отчёт npm audit
+│   ├── configs/suppression.xml       ← suppression для Dep-Check
+│   └── sca-comparison.md             ← сравнение 4 сканеров
+├── sbom/
+│   ├── juice-shop-sbom.cdx.json      ← SBOM CycloneDX (Syft)
+│   ├── juice-shop-sbom.spdx.json     ← SBOM SPDX (Syft)
+│   ├── juice-shop-sbom-cdxgen.json   ← SBOM CycloneDX (cdxgen)
+│   ├── sbom-comparison.md            ← сравнение Syft vs cdxgen
+│   └── configs/
+│       └── dependency-track-compose.yml
+├── license-audit/
+│   ├── trivy-license-report.json     ← отчёт Trivy license
+│   ├── scancode-report.json          ← отчёт ScanCode
+│   ├── configs/license-policy.yml    ← whitelist/blacklist
+│   └── license-report.md             ← сводный отчёт по лицензиям
+└── stage-2-summary.md                ← итоговый отчёт: CVE + SBOM + лицензии → требования
+```
+
+После завершения → [`../checklists/stage-2-checklist.md`](../checklists/stage-2-checklist.md) → [Этап 3](../stage-3-dynamic-analysis/)

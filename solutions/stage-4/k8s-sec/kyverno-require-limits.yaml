@@ -1,0 +1,26 @@
+# Kyverno: Require Resource Limits · Эталонное решение
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+  annotations:
+    policies.kyverno.io/description: >-
+      Требование D-02: K8s deployment ДОЛЖЕН иметь resource limits
+spec:
+  validationFailureAction: Enforce
+  rules:
+  - name: require-cpu-memory-limits
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "CPU и memory limits обязательны (Требование D-02)"
+      pattern:
+        spec:
+          containers:
+          - resources:
+              limits:
+                memory: "?*"
+                cpu: "?*"
