@@ -88,9 +88,11 @@ $(REPORTS):
 stage1-sast: clone-juice-shop $(REPORTS) ## Этап 1: SAST (Semgrep + Bandit + njsscan)
 	@echo "\n🔬 Semgrep..."
 	semgrep --config auto --sarif -o $(REPORTS)/semgrep.sarif $(JUICE_SHOP_SRC) || true
+	@echo "\n🔬 Bandit..."
+	bandit -r $(JUICE_SHOP_SRC) -f json -o $(REPORTS)/bandit.json || true
 	@echo "\n🔬 njsscan..."
 	njsscan --sarif -o $(REPORTS)/njsscan.sarif $(JUICE_SHOP_SRC) || true
-	@echo "\n✅ Отчёты: $(REPORTS)/semgrep.sarif, $(REPORTS)/njsscan.sarif"
+	@echo "\n✅ Отчёты: $(REPORTS)/semgrep.sarif, $(REPORTS)/bandit.json, $(REPORTS)/njsscan.sarif"
 
 stage1-secrets: clone-juice-shop $(REPORTS) ## Этап 1: Secrets (Gitleaks + TruffleHog)
 	@echo "\n🔑 Gitleaks..."
@@ -107,7 +109,9 @@ stage1-linters: clone-juice-shop $(REPORTS) ## Этап 1: Linters (hadolint + R
 	else \
 		echo "  ⚠️  Dockerfile not found"; \
 	fi
-	@echo "\n✅ Отчёт: $(REPORTS)/hadolint.json"
+	@echo "\n📏 Ruff..."
+	ruff check $(JUICE_SHOP_SRC) --output-format json > $(REPORTS)/ruff.json || true
+	@echo "\n✅ Отчёты: $(REPORTS)/hadolint.json, $(REPORTS)/ruff.json"
 
 stage1: stage1-sast stage1-secrets stage1-linters ## Этап 1: Все проверки
 
