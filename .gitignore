@@ -1,6 +1,5 @@
 # MkDocs build
 site/
-assets/demos/
 
 # Python
 __pycache__/
