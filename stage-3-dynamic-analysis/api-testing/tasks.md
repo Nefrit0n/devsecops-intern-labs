@@ -5,6 +5,25 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-3-dynamic-analysis/api-testing/
+├── README.md
+├── tasks.md
+├── cats-report/
+└── api-comparison.md
+```
+
+Перед выполнением создайте каталоги/черновики:
+
+```bash
+mkdir -p stage-3-dynamic-analysis/api-testing/cats-report
+touch stage-3-dynamic-analysis/api-testing/api-comparison.md
+```
+
+---
+
 ## Задание 1 · Postman: OWASP API Top 10 вручную
 **Тег:** 🟢 практика · **Время:** ~1.5 ч
 

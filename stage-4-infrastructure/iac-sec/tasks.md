@@ -2,6 +2,33 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-4-infrastructure/iac-sec/
+├── README.md
+├── tasks.md
+├── configs/
+│   └── custom-policy.py
+├── juice-shop-k8s-manifests/
+│   ├── deployment.yaml
+│   └── service.yaml
+└── iac-comparison.md
+```
+
+Создайте каркас перед запуском сканеров:
+
+```bash
+mkdir -p stage-4-infrastructure/iac-sec/configs
+mkdir -p stage-4-infrastructure/iac-sec/juice-shop-k8s-manifests
+touch stage-4-infrastructure/iac-sec/configs/custom-policy.py
+touch stage-4-infrastructure/iac-sec/juice-shop-k8s-manifests/deployment.yaml
+touch stage-4-infrastructure/iac-sec/juice-shop-k8s-manifests/service.yaml
+touch stage-4-infrastructure/iac-sec/iac-comparison.md
+```
+
+---
+
 ## Задание 0 · Подготовка: K8s манифесты для Juice Shop
 **Тег:** 🟢 практика · **Время:** ~20 мин
 

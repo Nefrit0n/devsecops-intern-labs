@@ -2,6 +2,27 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-5-pipeline-integration/supply-chain/
+├── README.md
+├── tasks.md
+├── configs/
+│   └── cosign-verify-policy.yaml
+└── supply-chain-setup.md
+```
+
+Создайте минимальный набор перед практикой:
+
+```bash
+mkdir -p stage-5-pipeline-integration/supply-chain/configs
+touch stage-5-pipeline-integration/supply-chain/configs/cosign-verify-policy.yaml
+touch stage-5-pipeline-integration/supply-chain/supply-chain-setup.md
+```
+
+---
+
 ## Задание 1 · cosign: подписание Docker-образов
 **Тег:** 🟢 практика · **Время:** ~1 ч
 

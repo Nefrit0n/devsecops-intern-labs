@@ -4,6 +4,29 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-3-dynamic-analysis/dast/
+├── README.md
+├── tasks.md
+├── configs/
+│   └── zap-automation.yaml        # YAML для ZAP Automation Framework
+├── nuclei-custom-templates/
+└── dast-comparison.md
+```
+
+Подготовьте каркас перед выполнением:
+
+```bash
+mkdir -p stage-3-dynamic-analysis/dast/configs
+mkdir -p stage-3-dynamic-analysis/dast/nuclei-custom-templates
+touch stage-3-dynamic-analysis/dast/configs/zap-automation.yaml
+touch stage-3-dynamic-analysis/dast/dast-comparison.md
+```
+
+---
+
 ## Задание 1 · ZAP: от baseline до full scan
 **Тег:** 🟢 практика · **Время:** ~2 ч
 

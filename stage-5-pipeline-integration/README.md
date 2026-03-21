@@ -115,30 +115,31 @@ pip install pre-commit
 ```
 stage-5-pipeline-integration/
 ├── ci-cd/
-│   ├── github-actions/
-│   │   ├── security-pr.yml              ← workflow для PR (SAST+SCA+IaC)
-│   │   └── security-main.yml            ← workflow для main (build+container+DAST)
-│   ├── gitlab-ci/
-│   │   └── .gitlab-ci.yml               ← аналогичный пайплайн для GitLab
-│   ├── pre-commit/
-│   │   └── .pre-commit-config.yaml      ← Gitleaks + hadolint + Semgrep
-│   └── pipeline-comparison.md           ← GH Actions vs GitLab CI
+│   ├── github-actions/                ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   ├── security-pr.yml              ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── security-main.yml            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── gitlab-ci/                      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── .gitlab-ci.yml               ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── pre-commit/                    ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── .pre-commit-config.yaml      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── pipeline-comparison.md           ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── defectdojo/
-│   ├── configs/
-│   │   └── docker-compose.yml           ← DefectDojo deployment
-│   ├── scripts/
-│   │   └── import-reports.sh            ← скрипт импорта всех отчётов через API
-│   └── defectdojo-setup.md              ← Product, Engagement, SLA, dashboard
+│   ├── configs/                        ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── docker-compose.yml           ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── scripts/                        ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── import-reports.sh            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── defectdojo-setup.md              ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── quality-gates/
-│   ├── scripts/
-│   │   ├── quality-gate.py              ← pass/fail скрипт
-│   │   └── metrics-collector.py         ← сбор метрик
-│   ├── requirements-coverage.md         ← маппинг: требования этапа 0 → findings → status
-│   └── security-metrics.md              ← MTTD, MTTR, trend, coverage
+│   ├── scripts/                        ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   ├── quality-gate.py              ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── metrics-collector.py         ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── requirements-coverage.md         ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── security-metrics.md              ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── supply-chain/
-│   ├── configs/cosign-verify-policy.yaml
-│   └── supply-chain-setup.md            ← cosign + SLSA инструкция
-└── stage-5-summary.md                   ← ИТОГ ВСЕГО КУРСА
+│   ├── configs/                        ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   │   └── cosign-verify-policy.yaml   ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── supply-chain-setup.md            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+└── stage-5-summary.md                   ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ```
 
 После завершения → [`../checklists/stage-5-checklist.md`](../checklists/stage-5-checklist.md)

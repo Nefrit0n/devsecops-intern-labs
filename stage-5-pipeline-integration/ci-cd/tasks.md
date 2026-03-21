@@ -2,6 +2,37 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-5-pipeline-integration/ci-cd/
+├── README.md
+├── tasks.md
+├── github-actions/
+│   ├── security-pr.yml
+│   └── security-main.yml
+├── gitlab-ci/
+│   └── .gitlab-ci.yml
+├── pre-commit/
+│   └── .pre-commit-config.yaml
+└── pipeline-comparison.md
+```
+
+Создайте каркас перед настройкой пайплайнов:
+
+```bash
+mkdir -p stage-5-pipeline-integration/ci-cd/github-actions
+mkdir -p stage-5-pipeline-integration/ci-cd/gitlab-ci
+mkdir -p stage-5-pipeline-integration/ci-cd/pre-commit
+touch stage-5-pipeline-integration/ci-cd/github-actions/security-pr.yml
+touch stage-5-pipeline-integration/ci-cd/github-actions/security-main.yml
+touch stage-5-pipeline-integration/ci-cd/gitlab-ci/.gitlab-ci.yml
+touch stage-5-pipeline-integration/ci-cd/pre-commit/.pre-commit-config.yaml
+touch stage-5-pipeline-integration/ci-cd/pipeline-comparison.md
+```
+
+---
+
 ## Задание 1 · Pre-commit: первый рубеж
 **Тег:** 🟢 практика · **Время:** ~30 мин
 

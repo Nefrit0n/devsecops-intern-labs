@@ -2,6 +2,25 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-4-infrastructure/container-sec/
+├── README.md
+├── tasks.md
+├── hardened-Dockerfile
+└── container-comparison.md
+```
+
+Создайте каркас файлов для фиксаций и сравнения:
+
+```bash
+touch stage-4-infrastructure/container-sec/hardened-Dockerfile
+touch stage-4-infrastructure/container-sec/container-comparison.md
+```
+
+---
+
 ## Задание 1 · Trivy image: полный скан образа
 **Тег:** 🟢 практика · **Время:** ~1 ч
 

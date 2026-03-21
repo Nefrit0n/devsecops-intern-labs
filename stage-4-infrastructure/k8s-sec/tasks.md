@@ -8,6 +8,26 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-4-infrastructure/k8s-sec/
+├── README.md
+├── tasks.md
+├── configs/
+│   └── kyverno-policies/
+└── k8s-comparison.md
+```
+
+Подготовьте директории для политик и отчёта:
+
+```bash
+mkdir -p stage-4-infrastructure/k8s-sec/configs/kyverno-policies
+touch stage-4-infrastructure/k8s-sec/k8s-comparison.md
+```
+
+---
+
 ## Задание 1 · Kubescape: комплексный posture scan
 **Тег:** 🟢 практика · **Время:** ~1 ч
 

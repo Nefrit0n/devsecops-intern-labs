@@ -150,26 +150,26 @@ docker pull endava/cats
 ```
 stage-3-dynamic-analysis/
 ├── dast/
-│   ├── zap-baseline-report.html      ← ZAP baseline scan
-│   ├── zap-full-report.json          ← ZAP full active scan
-│   ├── zap-automation.yaml           ← ZAP Automation Framework config
-│   ├── nuclei-report.json            ← Nuclei findings
-│   ├── nuclei-custom-templates/      ← ваши 2 кастомных шаблона
-│   ├── nikto-report.json             ← Nikto findings
-│   ├── wapiti-report.json            ← Wapiti findings
-│   └── dast-comparison.md            ← сравнение 4 сканеров
+│   ├── zap-baseline-report.html      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── zap-full-report.json          ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── zap-automation.yaml           ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── nuclei-report.json            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── nuclei-custom-templates/      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── nikto-report.json             ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── wapiti-report.json            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── dast-comparison.md            ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── fuzzing/
-│   ├── restler-results/              ← RESTler bugs + coverage
-│   ├── schemathesis-report.json      ← Schemathesis findings
-│   ├── ffuf-results/                 ← ffuf directory + param findings
-│   └── fuzzing-comparison.md         ← сравнение 3 фаззеров
+│   ├── restler-results/              ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── schemathesis-report.json      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── ffuf-results/                 ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── fuzzing-comparison.md         ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── api-testing/
-│   ├── postman-collection.json       ← Postman OWASP API Top 10
-│   ├── newman-report.html            ← Newman CI-прогон
-│   ├── dredd-results.json            ← Dredd contract validation
-│   ├── cats-report/                  ← CATS findings
-│   └── api-comparison.md             ← сравнение + OWASP API Top 10 coverage
-└── stage-3-summary.md                ← корреляция DAST↔SAST, что нашёл только DAST
+│   ├── postman-collection.json       ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── newman-report.html            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── dredd-results.json            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── cats-report/                  ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── api-comparison.md             ← ожидаемые артефакты студента (создаются в ходе выполнения)
+└── stage-3-summary.md                ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ```
 
 После завершения → [`../checklists/stage-3-checklist.md`](../checklists/stage-3-checklist.md) → [Этап 4](../stage-4-infrastructure/)

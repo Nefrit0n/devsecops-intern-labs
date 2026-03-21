@@ -2,6 +2,25 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-2-dependencies/sbom/
+├── README.md
+├── tasks.md
+├── sbom-comparison.md             # черновик сравнения форматов
+└── configs/
+    └── dependency-track-compose.yml
+```
+
+Если `sbom-comparison.md` отсутствует, создайте его заранее:
+
+```bash
+touch stage-2-dependencies/sbom/sbom-comparison.md
+```
+
+---
+
 ## Задание 1 · Syft: генерация SBOM
 **Тег:** 🟢 практика · **Время:** ~1 ч
 

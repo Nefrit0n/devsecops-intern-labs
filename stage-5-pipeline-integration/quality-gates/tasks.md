@@ -2,6 +2,31 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-5-pipeline-integration/quality-gates/
+├── README.md
+├── tasks.md
+├── scripts/
+│   ├── quality-gate.py
+│   └── metrics-collector.py
+├── requirements-coverage.md
+└── security-metrics.md
+```
+
+Подготовьте каркас для скриптов и отчётов:
+
+```bash
+mkdir -p stage-5-pipeline-integration/quality-gates/scripts
+touch stage-5-pipeline-integration/quality-gates/scripts/quality-gate.py
+touch stage-5-pipeline-integration/quality-gates/scripts/metrics-collector.py
+touch stage-5-pipeline-integration/quality-gates/requirements-coverage.md
+touch stage-5-pipeline-integration/quality-gates/security-metrics.md
+```
+
+---
+
 ## Задание 1 · Quality gate скрипт
 **Тег:** 🟢 практика · **Время:** ~1 ч
 
