@@ -15,6 +15,7 @@ on:
       - 'lab-infra/**'
       - 'assets/**'
       - 'scripts/prepare_mkdocs_docs.py'
+      - 'scripts/generate_progress.py'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -39,20 +40,48 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install MkDocs + Material
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── Markdown lint (allow-failure на первое время) ──────
+      - name: Markdown lint
+        continue-on-error: true
+        run: |
+          npx markdownlint-cli2 \
+            "site-docs/**/*.md" \
+            "stage-*/**/*.md" \
+            "docs/**/*.md" \
+            "checklists/**/*.md" || true
+
+      - name: Install MkDocs + Material + plugins
         run: |
           pip install \
             "mkdocs<2" \
             "mkdocs-material>=9.7,<10" \
             mkdocs-minify-plugin \
+            mkdocs-git-revision-date-localized-plugin \
+            mkdocs-macros-plugin \
             pymdown-extensions \
             pillow \
             cairosvg
 
+      # Генерация прогресса (если скрипт существует)
+      - name: Generate progress data
+        run: |
+          if [ -f scripts/generate_progress.py ]; then
+            python scripts/generate_progress.py
+          fi
+
+      # Собирает дерево docs: копирует stage-*/, targets/, docs/ и т.д.
+      # в .mkdocs-build-docs/ и перезаписывает внутренние ссылки
       - name: Prepare docs tree
         run: python scripts/prepare_mkdocs_docs.py
 
-      - name: Build site
+      # --strict: любое WARNING превращается в ошибку сборки.
+      # Ловит битые внутренние ссылки, отсутствующие страницы из nav,
+      # неизвестные markdown-расширения и другие проблемы.
+      - name: Build site (strict — проверка ссылок и навигации)
         run: mkdocs build --strict
 
       - name: Upload artifact
