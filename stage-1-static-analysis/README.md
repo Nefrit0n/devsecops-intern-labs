@@ -115,29 +115,33 @@ brew install hadolint
 
 ---
 
+## Что запускает `make stage1-*` (automated)
+
+> Ниже только **автоматические** проверки из `Makefile` (с сохранением отчётов в `reports/` в корне репозитория).  
+> Всё остальное в подпапках `stage-1-static-analysis/*` — **manual/lab deliverables**.
+
+| Команда | Что запускается | Выходные артефакты в `reports/` |
+|---------|------------------|----------------------------------|
+| `make stage1-sast` | Semgrep + Bandit + njsscan | `semgrep.sarif`, `bandit.json`, `njsscan.sarif` |
+| `make stage1-secrets` | Gitleaks + TruffleHog | `gitleaks.json`, `trufflehog.json` |
+| `make stage1-linters` | hadolint + Ruff | `hadolint.json`, `ruff.json` |
+| `make stage1` | Запускает все три команды выше | Все артефакты из `stage1-sast`, `stage1-secrets`, `stage1-linters` |
+
+---
+
 ## Артефакты этапа
 
 ```
-stage-1-static-analysis/
-├── sast/
-│   ├── semgrep-report.json           ← отчёт Semgrep
-│   ├── semgrep-custom-rules.yml      ← ваши 3 кастомных правила
-│   ├── bandit-report.json            ← отчёт Bandit
-│   ├── njsscan-report.sarif          ← отчёт njsscan
-│   └── sast-comparison.md            ← сравнение: кто что нашёл
-├── secrets/
-│   ├── gitleaks-report.json          ← отчёт Gitleaks
-│   ├── trufflehog-report.json        ← отчёт TruffleHog
-│   ├── detect-secrets-baseline.json  ← baseline detect-secrets
-│   ├── .gitleaks.toml                ← конфигурация Gitleaks
-│   ├── .pre-commit-config.yaml       ← pre-commit hook
-│   └── secrets-comparison.md         ← сравнение 3 инструментов
-├── linters/
-│   ├── .eslintrc.json                ← ESLint security config
-│   ├── pyproject.toml                ← Ruff config
-│   ├── .hadolint.yaml                ← hadolint config
-│   └── linters-report.md             ← сводный отчёт линтеров
-└── stage-1-summary.md                ← итоговый отчёт: findings → требования из этапа 0
+reports/
+├── semgrep.sarif                     ← make stage1-sast
+├── bandit.json                       ← make stage1-sast
+├── njsscan.sarif                     ← make stage1-sast
+├── gitleaks.json                     ← make stage1-secrets
+├── trufflehog.json                   ← make stage1-secrets
+├── hadolint.json                     ← make stage1-linters
+└── ruff.json                         ← make stage1-linters
 ```
+
+Дополнительно, manual-артефакты лабораторной работы (кастомные правила, baseline, сравнения инструментов и т.д.) оформляются в подпапках `stage-1-static-analysis/sast`, `stage-1-static-analysis/secrets`, `stage-1-static-analysis/linters` и в `stage-1-summary.md`.
 
 После завершения → [`../checklists/stage-1-checklist.md`](../checklists/stage-1-checklist.md) → [Этап 2](../stage-2-dependencies/)
