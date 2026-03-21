@@ -10,7 +10,7 @@ repo_url: "https://github.com/Nefrit0n/devsecops-intern-labs"
 repo_name: "devsecops-intern-labs"
 edit_uri: "edit/main/"
 
-docs_dir: "site-docs"
+docs_dir: ".mkdocs-build-docs"
 
 theme:
   name: material
@@ -62,7 +62,7 @@ extra:
     provider: ""
 
 extra_css:
-  - site-docs/assets/extra.css
+  - assets/extra.css
 
 copyright: "MIT License · Сделано для тех, кто хочет не просто запускать инструменты, а понимать зачем."
 
@@ -102,6 +102,14 @@ plugins:
       lang: ru
   - minify:
       minify_html: true
+
+not_in_nav: |
+  solutions/stage-0/**
+  solutions/stage-1/**
+  solutions/stage-2/**
+  solutions/stage-3/**
+  solutions/stage-4/**
+  solutions/stage-5/**
 
 # ────────────────────────────────────────────────────────────
 # Навигация

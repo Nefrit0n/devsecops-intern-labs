@@ -7,6 +7,14 @@ on:
       - '**.md'
       - 'mkdocs.yml'
       - 'site-docs/**'
+      - 'stage-*/**'
+      - 'targets/**'
+      - 'docs/**'
+      - 'checklists/**'
+      - 'solutions/**'
+      - 'lab-infra/**'
+      - 'assets/**'
+      - 'scripts/prepare_mkdocs_docs.py'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -34,11 +42,15 @@ jobs:
       - name: Install MkDocs + Material
         run: |
           pip install \
-            mkdocs-material \
+            "mkdocs<2" \
+            "mkdocs-material>=9.7,<10" \
             mkdocs-minify-plugin \
             pymdown-extensions \
             pillow \
             cairosvg
+
+      - name: Prepare docs tree
+        run: python scripts/prepare_mkdocs_docs.py
 
       - name: Build site
         run: mkdocs build --strict
