@@ -4,7 +4,7 @@
 # ============================================================
 
 site_name: "DevSecOps Lab · ГОСТ Р 56939-2024"
-site_description: "Практический полигон для изучения безопасной разработки ПО"
+site_description: "Практический полигон для изучения безопасной разработки ПО по ГОСТ Р 56939-2024 — 6 этапов, 30+ инструментов DevSecOps, 4 учебные мишени"
 site_url: "https://Nefrit0n.github.io/devsecops-intern-labs/"
 repo_url: "https://github.com/Nefrit0n/devsecops-intern-labs"
 repo_name: "devsecops-intern-labs"
@@ -44,6 +44,7 @@ theme:
     - navigation.path
     - navigation.top
     - navigation.indexes
+    - navigation.footer
     - search.suggest
     - search.highlight
     - search.share
@@ -120,6 +121,7 @@ nav:
     - index.md
     - "Быстрый старт": quickstart.md
     - "Маршрут обучения": roadmap.md
+    - "📊 Прогресс": progress.md
 
   - "🎯 Мишени":
     - targets/README.md
