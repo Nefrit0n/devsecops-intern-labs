@@ -12,8 +12,8 @@ hide:
 
 От теории ГОСТа до работающего CI/CD пайплайна с 50+ инструментами безопасности.
 
-[Начать обучение :material-rocket-launch:](site-docs/quickstart.md){ .md-button .md-button--primary }
-[Маршрут обучения :material-map-outline:](site-docs/roadmap.md){ .md-button }
+[Начать обучение :material-rocket-launch:](quickstart.md){ .md-button .md-button--primary }
+[Маршрут обучения :material-map-outline:](roadmap.md){ .md-button }
 
 </div>
 
@@ -108,6 +108,6 @@ hide:
 
 <div class="hero-cta" markdown>
 
-[:material-rocket-launch: Начать с быстрого старта](site-docs/quickstart.md){ .md-button .md-button--primary .md-button--stretch }
+[:material-rocket-launch: Начать с быстрого старта](quickstart.md){ .md-button .md-button--primary .md-button--stretch }
 
 </div>
