@@ -1,16 +1,17 @@
 ---
+description: "Практический полигон для изучения безопасной разработки ПО по ГОСТ Р 56939-2024. 6 этапов, 30+ инструментов, 4 учебные мишени."
 hide:
   - navigation
   - toc
 ---
 
-# DevSecOps Lab · ГОСТ Р 56939-2024
-
 <div class="hero" markdown>
 
-## Практический полигон для изучения безопасной разработки ПО
+# DevSecOps Lab
 
-От теории ГОСТа до практического набора автоматизированных проверок безопасности и учебных артефактов.
+## Практический полигон по ГОСТ Р 56939-2024
+
+От теории стандарта до работающего пайплайна безопасности — за 6 последовательных этапов.
 
 [Начать обучение :material-rocket-launch:](quickstart.md){ .md-button .md-button--primary }
 [Маршрут обучения :material-map-outline:](roadmap.md){ .md-button }
@@ -19,9 +20,76 @@ hide:
 
 ---
 
+## Маршрут обучения
+
+<div class="timeline" markdown>
+  <a class="timeline-step" href="stage-0/README.md">
+    <div class="timeline-icon stage-0">0</div>
+    <div class="timeline-label">Фундамент</div>
+    <div class="timeline-time">~12 ч</div>
+  </a>
+  <div class="timeline-arrow">→</div>
+  <a class="timeline-step" href="stage-1-static-analysis/README.md">
+    <div class="timeline-icon stage-1">1</div>
+    <div class="timeline-label">Статика</div>
+    <div class="timeline-time">~10 ч</div>
+  </a>
+  <div class="timeline-arrow">→</div>
+  <a class="timeline-step" href="stage-2-dependencies/README.md">
+    <div class="timeline-icon stage-2">2</div>
+    <div class="timeline-label">Зависимости</div>
+    <div class="timeline-time">~10 ч</div>
+  </a>
+  <div class="timeline-arrow">→</div>
+  <a class="timeline-step" href="stage-3-dynamic-analysis/README.md">
+    <div class="timeline-icon stage-3">3</div>
+    <div class="timeline-label">Динамика</div>
+    <div class="timeline-time">~12 ч</div>
+  </a>
+  <div class="timeline-arrow">→</div>
+  <a class="timeline-step" href="stage-4-infrastructure/README.md">
+    <div class="timeline-icon stage-4">4</div>
+    <div class="timeline-label">Инфраструктура</div>
+    <div class="timeline-time">~12 ч</div>
+  </a>
+  <div class="timeline-arrow">→</div>
+  <a class="timeline-step" href="stage-5-pipeline-integration/README.md">
+    <div class="timeline-icon stage-5">5</div>
+    <div class="timeline-label">Пайплайн</div>
+    <div class="timeline-time">~12 ч</div>
+  </a>
+</div>
+
+---
+
+## Ключевые цифры
+
+<div class="stat-cards">
+  <div class="stat-card">
+    <div class="stat-number">25</div>
+    <div class="stat-label">процессов ГОСТа</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">30+</div>
+    <div class="stat-label">инструментов</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">6</div>
+    <div class="stat-label">этапов</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number">~60</div>
+    <div class="stat-label">часов практики</div>
+  </div>
+</div>
+
+---
+
+## Что внутри
+
 <div class="grid cards" markdown>
 
--   :material-shield-check:{ .lg .middle } **6 этапов**
+-   :material-shield-check:{ .lg .middle } **6 этапов обучения**
 
     ---
 
@@ -31,9 +99,9 @@ hide:
 
     ---
 
-    Преднастроенные цели `lab-*`, `stage1-*` … `stage5-*`, `scan-all` для запуска этапов и сборки отчётов
+    Цели `lab-*`, `stage1-*` … `stage5-*`, `scan-all` для запуска этапов и сборки отчётов
 
--   :material-target:{ .lg .middle } **4 мишени**
+-   :material-target:{ .lg .middle } **4 учебные мишени**
 
     ---
 
@@ -49,45 +117,15 @@ hide:
 
     ---
 
-    `make lab-up` поднимает учебные мишени, `make lab-all` — расширенный стенд с management-сервисами
+    `make lab-up` поднимает мишени, `make lab-all` — расширенный стенд с management-сервисами
 
 -   :material-certificate:{ .lg .middle } **Практика + шаблоны**
 
     ---
 
-    Не видео-курс, а репозиторий с заданиями, шаблонами и зонами для самостоятельной реализации
+    Не видео-курс, а репозиторий с заданиями, шаблонами и зонами для самостоятельной работы
 
 </div>
-
----
-
-## Маршрут обучения
-
-| Этап | Название | Время | Инструменты |
-|------|---------|-------|-------------|
-| **0** | [Фундамент](stage-0/README.md) | ~12 ч | pytm, draw.io |
-| **1** | [Код под микроскопом](stage-1-static-analysis/README.md) | ~10 ч | Semgrep, Bandit, Gitleaks, TruffleHog, ESLint |
-| **2** | [Зависимости](stage-2-dependencies/README.md) | ~10 ч | Trivy, Dep-Check, Syft, Dependency-Track |
-| **3** | [Атакуем приложение](stage-3-dynamic-analysis/README.md) | ~12 ч | ZAP, Nuclei, RESTler, Postman, ffuf |
-| **4** | [Инфраструктура](stage-4-infrastructure/README.md) | ~12 ч | Dockle, Checkov, Kubescape, Falco, Kyverno |
-| **5** | [Пайплайн](stage-5-pipeline-integration/README.md) | ~12 ч | GitHub Actions, DefectDojo, cosign, SLSA |
-
----
-
-## Что уже реализовано
-
-- Структура из 6 этапов обучения и документация по каждому этапу.
-- Учебные мишени и инструкции по их запуску.
-- Набор automation-targets в `Makefile` для инфраструктуры и этапов (`lab-*`, `stage1-*` … `stage5-*`, `scan-all`).
-- Скрипты подготовки окружения и проверки инструментов.
-- Базовые шаблоны/каркас для интеграции отчётов и quality gates.
-
-## Что выполняет студент
-
-- Последовательно проходит этапы и запускает соответствующие цели `Makefile`.
-- Анализирует отчёты сканеров, устраняет проблемы и фиксирует результаты в артефактах этапов.
-- Создаёт недостающие пользовательские артефакты (например, скрипты интеграции для этапа 5 в своей зоне решений).
-- Настраивает требования и quality gates под контекст своей команды/учебной программы.
 
 ---
 
@@ -95,25 +133,25 @@ hide:
 
 <div class="grid cards" markdown>
 
--   **Junior/Middle DevSecOps**
+-   :material-account-hard-hat:{ .lg .middle } **Junior/Middle DevSecOps**
 
     ---
 
     Хотите системно изучить инструменты и процессы безопасной разработки
 
--   **AppSec-инженеры**
+-   :material-shield-account:{ .lg .middle } **AppSec-инженеры**
 
     ---
 
     Нужна практика с конкретными инструментами и привязка к ГОСТу
 
--   **Разработчики**
+-   :material-code-braces:{ .lg .middle } **Разработчики**
 
     ---
 
     Хотите понять, что делает DevSecOps и зачем все эти сканеры в CI
 
--   **Готовящиеся к аудиту**
+-   :material-clipboard-check:{ .lg .middle } **Готовящиеся к аудиту**
 
     ---
 
@@ -125,6 +163,6 @@ hide:
 
 <div class="hero-cta" markdown>
 
-[:material-rocket-launch: Начать с быстрого старта](quickstart.md){ .md-button .md-button--primary .md-button--stretch }
+[:material-rocket-launch: Начать обучение](quickstart.md){ .md-button .md-button--primary .md-button--stretch }
 
 </div>
