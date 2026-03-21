@@ -4,6 +4,27 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-3-dynamic-analysis/fuzzing/
+├── README.md
+├── tasks.md
+├── restler-results/
+├── ffuf-results/
+└── fuzzing-comparison.md
+```
+
+Создайте минимальный каркас для отчётов:
+
+```bash
+mkdir -p stage-3-dynamic-analysis/fuzzing/restler-results
+mkdir -p stage-3-dynamic-analysis/fuzzing/ffuf-results
+touch stage-3-dynamic-analysis/fuzzing/fuzzing-comparison.md
+```
+
+---
+
 ## Задание 1 · RESTler: stateful API fuzzing
 **Тег:** 🟢 практика · **Время:** ~1.5 ч
 

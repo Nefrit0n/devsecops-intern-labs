@@ -2,6 +2,27 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-2-dependencies/sca/
+├── README.md
+├── tasks.md
+├── configs/
+│   └── suppression.xml            # шаблон для Dependency-Check
+└── sca-comparison.md              # черновик итогового сравнения
+```
+
+Если файлов `configs/suppression.xml` и `sca-comparison.md` ещё нет — создайте их перед стартом:
+
+```bash
+mkdir -p stage-2-dependencies/sca/configs
+touch stage-2-dependencies/sca/configs/suppression.xml
+touch stage-2-dependencies/sca/sca-comparison.md
+```
+
+---
+
 ## Задание 1 · npm audit: стартовая точка
 **Тег:** 🟢 практика · **Время:** ~30 мин
 

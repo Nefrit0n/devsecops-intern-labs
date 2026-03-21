@@ -1,0 +1,33 @@
+name: Docs Artifacts Consistency
+
+on:
+  pull_request:
+    paths:
+      - 'stage-2-dependencies/**'
+      - 'stage-3-dynamic-analysis/**'
+      - 'stage-4-infrastructure/**'
+      - 'stage-5-pipeline-integration/**'
+      - 'scripts/validate_stage_artifacts.py'
+      - '.github/workflows/docs-artifacts-consistency.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'stage-2-dependencies/**'
+      - 'stage-3-dynamic-analysis/**'
+      - 'stage-4-infrastructure/**'
+      - 'stage-5-pipeline-integration/**'
+      - 'scripts/validate_stage_artifacts.py'
+      - '.github/workflows/docs-artifacts-consistency.yml'
+
+jobs:
+  validate-doc-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate artifact paths from stage docs
+        run: python scripts/validate_stage_artifacts.py

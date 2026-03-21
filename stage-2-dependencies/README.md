@@ -145,25 +145,25 @@ gem install license_finder  # или через Docker
 ```
 stage-2-dependencies/
 ├── sca/
-│   ├── trivy-report.json             ← отчёт Trivy
-│   ├── dependency-check-report.html  ← отчёт OWASP Dep-Check
-│   ├── grype-report.json             ← отчёт Grype
-│   ├── npm-audit-report.json         ← отчёт npm audit
-│   ├── configs/suppression.xml       ← suppression для Dep-Check
-│   └── sca-comparison.md             ← сравнение 4 сканеров
+│   ├── trivy-report.json             ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── dependency-check-report.html  ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── grype-report.json             ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── npm-audit-report.json         ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── configs/suppression.xml       ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── sca-comparison.md             ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── sbom/
-│   ├── juice-shop-sbom.cdx.json      ← SBOM CycloneDX (Syft)
-│   ├── juice-shop-sbom.spdx.json     ← SBOM SPDX (Syft)
-│   ├── juice-shop-sbom-cdxgen.json   ← SBOM CycloneDX (cdxgen)
-│   ├── sbom-comparison.md            ← сравнение Syft vs cdxgen
+│   ├── juice-shop-sbom.cdx.json      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── juice-shop-sbom.spdx.json     ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── juice-shop-sbom-cdxgen.json   ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── sbom-comparison.md            ← ожидаемые артефакты студента (создаются в ходе выполнения)
 │   └── configs/
 │       └── dependency-track-compose.yml
 ├── license-audit/
-│   ├── trivy-license-report.json     ← отчёт Trivy license
-│   ├── scancode-report.json          ← отчёт ScanCode
-│   ├── configs/license-policy.yml    ← whitelist/blacklist
-│   └── license-report.md             ← сводный отчёт по лицензиям
-└── stage-2-summary.md                ← итоговый отчёт: CVE + SBOM + лицензии → требования
+│   ├── trivy-license-report.json     ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── scancode-report.json          ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── configs/license-policy.yml    ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── license-report.md             ← ожидаемые артефакты студента (создаются в ходе выполнения)
+└── stage-2-summary.md                ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ```
 
 После завершения → [`../checklists/stage-2-checklist.md`](../checklists/stage-2-checklist.md) → [Этап 3](../stage-3-dynamic-analysis/)

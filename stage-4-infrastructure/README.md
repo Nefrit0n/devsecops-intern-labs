@@ -142,27 +142,27 @@ helm install kyverno kyverno/kyverno -n kyverno --create-namespace
 ```
 stage-4-infrastructure/
 ├── container-sec/
-│   ├── trivy-image-report.json        ← CVE в образе Juice Shop
-│   ├── grype-image-report.json        ← Grype findings
-│   ├── dockle-report.json             ← CIS Docker Benchmark
-│   ├── scout-recommendations.md       ← Docker Scout рекомендации по base image
-│   ├── hardened-Dockerfile            ← исправленный Dockerfile
-│   └── container-comparison.md        ← сравнение 4 инструментов
+│   ├── trivy-image-report.json        ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── grype-image-report.json        ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── dockle-report.json             ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── scout-recommendations.md       ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── hardened-Dockerfile            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── container-comparison.md        ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── iac-sec/
-│   ├── checkov-report.json            ← Checkov findings
-│   ├── kics-report.json               ← KICS findings
-│   ├── trivy-config-report.json       ← Trivy config findings
-│   ├── kubelinter-report.json         ← KubeLinter findings
-│   ├── configs/custom-policy.py       ← кастомная Checkov-политика
-│   ├── juice-shop-k8s-manifests/      ← K8s манифесты для Juice Shop
-│   └── iac-comparison.md              ← сравнение 4 сканеров
+│   ├── checkov-report.json            ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── kics-report.json               ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── trivy-config-report.json       ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── kubelinter-report.json         ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── configs/custom-policy.py       ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── juice-shop-k8s-manifests/      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── iac-comparison.md              ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ├── k8s-sec/
-│   ├── kubescape-report.json          ← Kubescape CIS + NSA + MITRE
-│   ├── kube-bench-report.json         ← CIS Kubernetes Benchmark
-│   ├── falco-alerts.json              ← Falco runtime alerts
-│   ├── configs/kyverno-policies/      ← Kyverno policy YAMLs
-│   └── k8s-comparison.md             ← сравнение + K8s Goat findings
-└── stage-4-summary.md                 ← defense in depth: все слои вместе
+│   ├── kubescape-report.json          ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── kube-bench-report.json         ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── falco-alerts.json              ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   ├── configs/kyverno-policies/      ← ожидаемые артефакты студента (создаются в ходе выполнения)
+│   └── k8s-comparison.md              ← ожидаемые артефакты студента (создаются в ходе выполнения)
+└── stage-4-summary.md                 ← ожидаемые артефакты студента (создаются в ходе выполнения)
 ```
 
 После завершения → [`../checklists/stage-4-checklist.md`](../checklists/stage-4-checklist.md) → [Этап 5](../stage-5-pipeline-integration/)

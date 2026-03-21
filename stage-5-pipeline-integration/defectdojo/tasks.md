@@ -2,6 +2,31 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-5-pipeline-integration/defectdojo/
+├── README.md
+├── tasks.md
+├── configs/
+│   └── docker-compose.yml
+├── scripts/
+│   └── import-reports.sh
+└── defectdojo-setup.md
+```
+
+Если файлов ещё нет, подготовьте skeleton:
+
+```bash
+mkdir -p stage-5-pipeline-integration/defectdojo/configs
+mkdir -p stage-5-pipeline-integration/defectdojo/scripts
+touch stage-5-pipeline-integration/defectdojo/configs/docker-compose.yml
+touch stage-5-pipeline-integration/defectdojo/scripts/import-reports.sh
+touch stage-5-pipeline-integration/defectdojo/defectdojo-setup.md
+```
+
+---
+
 ## Задание 1 · Развёртывание
 **Тег:** 🟢 практика · **Время:** ~30 мин
 

@@ -2,6 +2,27 @@
 
 ---
 
+## Starter kit (минимальный skeleton)
+
+```text
+stage-2-dependencies/license-audit/
+├── README.md
+├── tasks.md
+├── license-report.md              # сводный отчёт по лицензиям
+└── configs/
+    └── license-policy.yml         # whitelist/blacklist политики
+```
+
+Если `configs/license-policy.yml` и `license-report.md` отсутствуют, создайте их:
+
+```bash
+mkdir -p stage-2-dependencies/license-audit/configs
+touch stage-2-dependencies/license-audit/configs/license-policy.yml
+touch stage-2-dependencies/license-audit/license-report.md
+```
+
+---
+
 ## Задание 1 · Trivy license: быстрый чек
 **Тег:** 🟢 практика · **Время:** ~30 мин
 
