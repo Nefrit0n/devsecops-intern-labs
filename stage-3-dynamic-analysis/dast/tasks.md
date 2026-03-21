@@ -32,8 +32,27 @@ touch stage-3-dynamic-analysis/dast/dast-comparison.md
 
 ### Шаг 1: Baseline scan (passive, 2 мин)
 
+**macOS / Windows (Docker Desktop):**
 ```bash
-docker run --rm -v $(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk \
+docker run --rm -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+  -t http://host.docker.internal:3000 \
+  -r zap-baseline-report.html \
+  -J zap-baseline-report.json
+```
+
+**Linux (вариант 1, проще — host network):**
+```bash
+docker run --rm --network=host -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+  -t http://127.0.0.1:3000 \
+  -r zap-baseline-report.html \
+  -J zap-baseline-report.json
+```
+
+**Linux (вариант 2, если нужен bridge network):**
+```bash
+docker run --rm --add-host=host.docker.internal:host-gateway -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
   ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
   -t http://host.docker.internal:3000 \
   -r zap-baseline-report.html \
@@ -49,8 +68,27 @@ Baseline scan **не атакует** — он только просматрив
 
 ### Шаг 2: Full active scan (10–30 мин)
 
+**macOS / Windows (Docker Desktop):**
 ```bash
-docker run --rm -v $(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk \
+docker run --rm -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+  -t http://host.docker.internal:3000 \
+  -r zap-full-report.html \
+  -J zap-full-report.json
+```
+
+**Linux (вариант 1, проще — host network):**
+```bash
+docker run --rm --network=host -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+  -t http://127.0.0.1:3000 \
+  -r zap-full-report.html \
+  -J zap-full-report.json
+```
+
+**Linux (вариант 2, если нужен bridge network):**
+```bash
+docker run --rm --add-host=host.docker.internal:host-gateway -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
   ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
   -t http://host.docker.internal:3000 \
   -r zap-full-report.html \
@@ -68,8 +106,29 @@ Active scan **атакует** — подставляет SQL injection, XSS, pa
 
 Juice Shop имеет REST API. Найдите его спецификацию (подсказка: попробуйте `/api-docs` или изучите сетевые запросы в DevTools).
 
+**macOS / Windows (Docker Desktop):**
 ```bash
-docker run --rm -v $(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk \
+docker run --rm -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
+  -t http://host.docker.internal:3000/api-docs \
+  -f openapi \
+  -r zap-api-report.html \
+  -J zap-api-report.json
+```
+
+**Linux (вариант 1, проще — host network):**
+```bash
+docker run --rm --network=host -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
+  -t http://127.0.0.1:3000/api-docs \
+  -f openapi \
+  -r zap-api-report.html \
+  -J zap-api-report.json
+```
+
+**Linux (вариант 2, если нужен bridge network):**
+```bash
+docker run --rm --add-host=host.docker.internal:host-gateway -v "$(pwd)/stage-3-dynamic-analysis/dast:/zap/wrk" \
   ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
   -t http://host.docker.internal:3000/api-docs \
   -f openapi \
@@ -111,8 +170,23 @@ jobs:
       reportFile: "zap-automation-report.json"
 ```
 
+**macOS / Windows (Docker Desktop):**
 ```bash
-docker run --rm -v $(pwd)/stage-3-dynamic-analysis/dast/configs:/zap/wrk \
+docker run --rm -v "$(pwd)/stage-3-dynamic-analysis/dast/configs:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap.sh -cmd \
+  -autorun /zap/wrk/zap-automation.yaml
+```
+
+**Linux (вариант 1, проще — host network):**
+```bash
+docker run --rm --network=host -v "$(pwd)/stage-3-dynamic-analysis/dast/configs:/zap/wrk" \
+  ghcr.io/zaproxy/zaproxy:stable zap.sh -cmd \
+  -autorun /zap/wrk/zap-automation.yaml
+```
+
+**Linux (вариант 2, если нужен bridge network):**
+```bash
+docker run --rm --add-host=host.docker.internal:host-gateway -v "$(pwd)/stage-3-dynamic-analysis/dast/configs:/zap/wrk" \
   ghcr.io/zaproxy/zaproxy:stable zap.sh -cmd \
   -autorun /zap/wrk/zap-automation.yaml
 ```
@@ -123,6 +197,34 @@ docker run --rm -v $(pwd)/stage-3-dynamic-analysis/dast/configs:/zap/wrk \
 
 ## Задание 2 · Nuclei: template-based scanning
 **Тег:** 🟢 практика · **Время:** ~1.5 ч
+
+### Troubleshooting: если ZAP «не видит» localhost
+
+Проверяйте по шагам:
+
+1) **Целевой сервис доступен с хоста**
+```bash
+curl -I http://localhost:3000
+```
+Ожидаемый результат: HTTP-статус (`HTTP/1.1 200`, `302` или другой валидный ответ), а не `Connection refused`.
+
+2) **Доступ из Linux-контейнера через host network**
+```bash
+docker run --rm --network=host curlimages/curl:8.12.1 -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3000
+```
+Ожидаемый результат: `200`/`302`/`401` и т.п. (любой HTTP-код, но не ошибка сети).
+
+3) **Доступ из Linux-контейнера через host.docker.internal**
+```bash
+docker run --rm --add-host=host.docker.internal:host-gateway curlimages/curl:8.12.1 -s -o /dev/null -w "%{http_code}\n" http://host.docker.internal:3000
+```
+Ожидаемый результат: HTTP-код. Если видите `000`, значит контейнер не может достучаться до хоста — используйте `--network=host` или проверьте firewall/порт-маппинг.
+
+4) **Проверка DNS-резолва host.docker.internal (Linux)**
+```bash
+docker run --rm --add-host=host.docker.internal:host-gateway busybox getent hosts host.docker.internal
+```
+Ожидаемый результат: строка с IP и именем `host.docker.internal`.
 
 ### Шаг 1: Скан с community templates
 
