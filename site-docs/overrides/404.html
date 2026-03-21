@@ -1,11 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>404 · Страница не найдена</h1>
-<p>Возможно, вы ищете один из этапов курса:</p>
-<ul>
-  <li><a href="{{ config.site_url }}">Главная</a></li>
-  <li><a href="{{ config.site_url }}quickstart/">Быстрый старт</a></li>
-  <li><a href="{{ config.site_url }}stage-0/">Этап 0 · Фундамент</a></li>
-</ul>
+<div class="page-404">
+  <h1>404</h1>
+  <p>Страница не найдена. Возможно, она была перемещена или ещё не создана.</p>
+
+  <div class="page-404-stages">
+    <a href="{{ config.site_url }}" style="background: var(--md-primary-fg-color);">🏠 Главная</a>
+    <a href="{{ config.site_url }}quickstart/" style="background: var(--md-accent-fg-color);">🚀 Быстрый старт</a>
+    <a href="{{ config.site_url }}stage-0/" style="background: var(--stage-0-color);">Этап 0</a>
+    <a href="{{ config.site_url }}stage-1-static-analysis/" style="background: var(--stage-1-color);">Этап 1</a>
+    <a href="{{ config.site_url }}stage-2-dependencies/" style="background: var(--stage-2-color);">Этап 2</a>
+    <a href="{{ config.site_url }}stage-3-dynamic-analysis/" style="background: var(--stage-3-color);">Этап 3</a>
+    <a href="{{ config.site_url }}stage-4-infrastructure/" style="background: var(--stage-4-color);">Этап 4</a>
+    <a href="{{ config.site_url }}stage-5-pipeline-integration/" style="background: var(--stage-5-color);">Этап 5</a>
+  </div>
+
+  <p>Попробуйте воспользоваться поиском:</p>
+  <div style="max-width: 400px; margin: 0 auto;">
+    <form action="{{ config.site_url }}search.html" method="get" style="display: flex; gap: 0.5rem;">
+      <input
+        type="text"
+        name="q"
+        placeholder="Поиск по курсу…"
+        style="flex: 1; padding: 0.5rem 1rem; border: 1px solid var(--md-default-fg-color--lightest); border-radius: 2rem; background: var(--md-default-bg-color); color: var(--md-default-fg-color); font-size: 0.9rem;"
+      />
+    </form>
+  </div>
+</div>
 {% endblock %}

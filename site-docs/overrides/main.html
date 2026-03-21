@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block announce %}
+<div class="md-banner" id="announce-banner" style="position: relative;">
+  Курс в активной разработке ·
+  <a href="{{ config.repo_url }}">⭐ Star on GitHub</a>
+  <button class="md-banner__dismiss" onclick="this.parentElement.style.display='none'; localStorage.setItem('banner-dismissed','1')" aria-label="Закрыть">&times;</button>
+</div>
+<script>
+  if (localStorage.getItem('banner-dismissed') === '1') {
+    document.getElementById('announce-banner').style.display = 'none';
+  }
+</script>
+{% endblock %}
