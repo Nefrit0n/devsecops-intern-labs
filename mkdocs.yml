@@ -61,6 +61,12 @@ extra:
   generator: false
   analytics:
     provider: ""
+  # Переменные для macros-плагина ({{ tools_count }}, {{ stages_count }} и т.д.)
+  gost_processes: 25
+  tools_count: "30+"
+  stages_count: 6
+  total_hours: "~60"
+  targets_count: 4
 
 extra_css:
   - assets/extra.css
@@ -103,6 +109,20 @@ plugins:
       lang: ru
   - minify:
       minify_html: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: timeago
+      locale: ru
+      fallback_to_build_date: true
+      strict: false
+  - macros:
+      verbose: false
+      on_error_fail: false
+      on_undefined: keep
+      j2_block_start_string: "[%"
+      j2_block_end_string: "%]"
+      j2_variable_start_string: "[["
+      j2_variable_end_string: "]]"
 
 not_in_nav: |
   solutions/stage-0/**
